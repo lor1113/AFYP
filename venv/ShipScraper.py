@@ -3,7 +3,7 @@ from requests_html import HTMLSession
 import json
 import re
 
-ships = []
+ships = {}
 session = HTMLSession()
 header = {'user_agent':'skeet skeet yeet','Accept-Encoding':'gzip'}
 datab = session.get('https://us-news.zlongame.com/sgwarship/index.jhtml',headers = header)
@@ -21,7 +21,8 @@ def writer(target,tbw):
         json.dump(tbw,outfile)
 
 def parse(data):
-    ship = {a}
+    ship = {}
+    name = ''
     ship['resistances'] = [0,0,0]
     ship['artillery'] = {
             "damage" : 0,
@@ -50,6 +51,8 @@ def parse(data):
                 ship['type'] = 3
             if "Battleship" in each.text:
                 ship['type'] = 4
+        if "Class" in each.text:
+            name = each.text.replace("Class","").strip()
         if "Processor" in each.text:
             ship['processor'] = intextract(each.text.split())
         if "Power" in each.text:
@@ -101,7 +104,7 @@ def parse(data):
             ship['artillery']['range'] = listN.pop()
             ship['artillery']['name'] = names[ship['type']] + " Std Artillery"
     print(ship)
-    ships.append(ship)
+    ships[name] = ship
 
 for each in links:
     datab = session.get(each, headers=header)
