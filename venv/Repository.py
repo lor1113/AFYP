@@ -67,8 +67,7 @@ class Ship():
         else:
             print("Not enough device slots")
 
-
-ShipDB = {
+TestShipDB = {
     "Covert": {
         "type" : 0,
         'tech' : 0,
@@ -192,6 +191,6 @@ class Device():
     def fitting(self):
         return([processor,power])
 
-myship = Ship(ShipDB['Covert'],clean)
+myship = Ship(TestShipDB['Covert'],clean)
 print (myship.dps)
 print(myship.gunNames)

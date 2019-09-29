@@ -14,7 +14,6 @@ def intextract(string):
     base =''.join(x for x in flat if x.isdigit())
     return(int(base))
 
-r = session.get('https://us-news.zlongame.com/oeshiptype1/3089.jhtml',headers = header)
 names = ["Frigate","Destroyer","Cruiser","Battlecruiser","Battleship"]
 def writer(target,tbw):
     with open(target,'w') as outfile:
