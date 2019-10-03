@@ -1,7 +1,10 @@
+import math
+
 class Ship():
     def __init__(self,db,char):
         self.db = db
-        self.applySkills(char)
+        self.char = char
+        self.applySkills(self.char)
     def reset(self):
         self.type = self.db['type']
         self.race = self.db['race']
@@ -20,7 +23,7 @@ class Ship():
         self.agility =  self.db['agility']
         self.volume =  self.db['volume']
         self.shieldRecovery =  self.db['shieldRecovery']
-        self.artillery = Gun(self.db['artillery'])
+        self.artillery = self.db['artillery']
         self.dps = 0
         self.devices = []
         self.guns = []
@@ -34,7 +37,8 @@ class Ship():
             self.devCap = 3
             if char.skills()['Ships'][self.race][0][self.type] > 5:
                 self.comCap = self.comCap + 1
-    def addGun(self,gun):
+    def addGun(self,gundb):
+        gun = Gun(gundb,self.char)
         fitting = gun.fitting()
         processr = self.processor - fitting[0]
         powr = self.power - fitting[1]
@@ -50,6 +54,10 @@ class Ship():
             self.guns.append(gun)
             self.gunNames.append(gun.namer())
             self.dps = self.dps + gun.dps()
+    def dps(self):
+        return(sum([gun.dps() for gun in self.guns]))
+    def dpsResist(self,resist):
+        return(sum([gun.dpsResist(resist) for gun in self.guns]))
     def addDevice(self,device):
         fitting = device.fitting()
         processr = processor - fitting[0]
@@ -66,6 +74,10 @@ class Ship():
             devices.append(device)
         else:
             print("Not enough device slots")
+    def ammoTime(self):
+        times = [gun.ammoTime() for gun in self.guns]
+        return min(times)
+
 
 TestShipDB = {
     "Covert": {
@@ -87,12 +99,16 @@ TestShipDB = {
         "volume" : 140,
         "shieldRecovery": 1,
         "artillery" : {
+            "tech" : 0,
+            "rank" : 0,
             "damage" : 18,
             "damages" : False,
             "cooldown" : 1,
             "range" : 9,
             'precision' : 0,
             "tracking" : 0,
+            "critChance" : 0,
+            "critDmg" : 0,
             "activation" : 0,
             "ammo" : 0,
             "ammoUsage" : 1,
@@ -101,11 +117,47 @@ TestShipDB = {
             "type" : 0,
             "name" : "Frigate Std Artillery"
         }
-
     }
 }
 GunDB = {
-
+    "artillery": {
+        "damage": 18,
+        "damages": False,
+        "cooldown": 1,
+        "range": 9,
+        'precision': 0,
+        "tech": 0,
+        "rank": 0,
+        "tracking": 0,
+        "critChance": 0,
+        "critDmg": 0,
+        "activation": 0,
+        "ammo": 0,
+        "ammoUsage": 1,
+        "processor": 0,
+        "power": 0,
+        "type": 0,
+        "name": "Frigate Std Artillery"
+    },
+    "S-Combat Railgun I 1": {
+        "damage": 124,
+        "damages": [31,93,0],
+        "cooldown": 4,
+        "range": 12.5,
+        "critChance": 10.0,
+        "critDmg" : 2,
+        "precision": 71.4,
+        "tracking": 700,
+        "activation": 41,
+        "ammo": 450,
+        "ammoUsage": 1,
+        "processor": 42,
+        "power": 23,
+        "tech": 1,
+        "type": 1,
+        "rank": 1,
+        "name": "S-Combat Railgun I 1"
+    }
 }
 
 class Character:
@@ -148,43 +200,57 @@ class Character:
 clean = Character()
 
 class Gun():
-    def __init__(self, db):
-        self.damage =  db['damage']
-        self.damages = db['damages']
-        self.cooldown =  db['cooldown']
-        self.range =  db['range']
-        self.precision =  db['precision']
-        self.tracking =  db['tracking']
-        self.activation =  db['activation']
-        self.ammo =  db['ammo']
-        self.ammoUsage =  db['ammoUsage']
-        self.processor =  db['processor']
-        self.power =  db['power']
-        self.type =  db['type']
-        self.name = db['name']
+    def __init__(self,db,char):
+        self.db = db
+        self.applySkills(char)
+    def applySkills(self,char):
+        self.reset()
+    def reset(self):
+        self.damage =  self.db['damage']
+        self.damages = self.db['damages']
+        self.cooldown =  self.db['cooldown']
+        self.range =  self.db['range']
+        self.precision =  self.db['precision']
+        self.tracking =  self.db['tracking']
+        self.activation =  self.db['activation']
+        self.ammo =  self.db['ammo']
+        self.tech = self.db['tech']
+        self.rank = self.db['rank']
+        self.ammoUsage =  self.db['ammoUsage']
+        self.processor =  self.db['processor']
+        self.power =  self.db['power']
+        self.type =  self.db['type']
+        self.critChance = self.db['critChance']/10
+        self.critDmg = self.db['critDmg']
+        self.name = self.db['name']
     def namer(self):
         return(self.name)
     def fitting(self):
         return([self.processor,self.power])
     def dps(self):
         if self.damages:
-            return(sum(self.damages)/self.cooldown)
+            return(((sum(self.damages)/self.cooldown)*(1-self.critChance)) + ((sum(self.damages)/self.cooldown)*(self.critChance*self.critDmg)))
         else:
-            return(self.damage/self.cooldown)
+            return (((self.damage / self.cooldown) * (1 - self.critChance)) + ((self.damage / self.cooldown) * (self.critChance * self.critDmg)))
     def dpsResist(self,resist):
-        alpha = (self.damage[0]*(1-resist[0]) + self.damage[1]*(1-resist[1]) + self.damage[2]*(1-resist[3]))
-        return(alpha/self.cooldown)
+        if self.damages:
+            one = (((self.damages[0]/self.cooldown)*(1-self.critChance)) + ((self.damages[0]/self.cooldown)*(self.critChance*self.critDmg)))*(1-resist[0])
+            two = (((self.damages[1]/self.cooldown)*(1-self.critChance)) + ((self.damages[1]/self.cooldown)*(self.critChance*self.critDmg)))*(1-resist[1])
+            three = (((self.damages[2]/self.cooldown)*(1-self.critChance)) + ((self.damages[2]/self.cooldown)*(self.critChance*self.critDmg)))*(1-resist[2])
+            return(one+two+three)
+        else:
+            return (((self.damage / self.cooldown) * (1 - self.critChance)) + ((self.damage / self.cooldown) * (self.critChance * self.critDmg)))
     def drain(self):
         return(self.activation/self.cooldown)
     def ammoTime(self):
         if self.ammo == 0:
-            return 0
+            return math.inf
         else:
             return((self.ammo/self.ammoUsage)*self.cooldown)
 
 class Device():
     def __init__(self, db):
-        effects =  db['effects']
+        type = db['type']
         processor =  db['processor']
         power =  db['power']
         limits =  db['limits']
@@ -192,5 +258,8 @@ class Device():
         return([processor,power])
 
 myship = Ship(TestShipDB['Covert'],clean)
-print (myship.dps)
-print(myship.gunNames)
+myship.addGun(GunDB['S-Combat Railgun I 1'])
+myship.addGun(GunDB['S-Combat Railgun I 1'])
+myship.addGun(GunDB['S-Combat Railgun I 1'])
+print(myship.dpsResist([0.5,0.5,0.5]))
+print(myship.dps)

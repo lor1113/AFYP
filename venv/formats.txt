@@ -1,0 +1,56 @@
+Enhancer    1
+    Thruster
+    Agility Thruster
+    Screen
+    Enhancer
+Area Enhancer   2
+    Screen
+    Velocity
+    Enhancer
+Extender Enhancer   3
+    Screen
+    Velocity
+Recharger   4
+    Shield
+    Energy
+Extended Recharger  5
+    Shield
+    Energy
+Area Recharger  6
+    Shield
+    Energy
+Tactical    7
+    Flashjump
+    Cloak
+    Shield
+    Scanner
+Area Interference   8
+    Screen
+    Velocity
+    Warp
+    Damage
+    Range
+    Precision
+    Signal
+    Neut
+Extended Interference   9
+    Screen
+    Velocity
+    Warp
+    Damage
+    Range
+    Precision
+    Signal
+    Neut
+
+
+ARTILLERY - 0
+?-?-?
+LASERS - 1
+10-20-70
+BLASTERS - 2
+70-10-20
+MISSILES - 3
+0-60-40
+RAILGUNS - 4
+25-75-0

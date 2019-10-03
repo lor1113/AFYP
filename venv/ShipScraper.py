@@ -30,6 +30,8 @@ def parse(data):
             "range" : 0,
             'precision' : 0,
             "tracking" : 0,
+            "critChance": 0,
+            "critDmg": 0,
             "activation" : 0,
             "ammo" : 0,
             "ammoUsage" : 1,
