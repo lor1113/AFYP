@@ -1,47 +1,84 @@
 Enhancer    1
-    Thruster
-    Agility Thruster
-    Screen
-    Enhancer
+    Thruster    11
+    Agility Thruster    12
+    Screen (spec)   13
+        EM  131
+        Heat    132
+        Kinetic 133
+    Screen (Adaptive)   14
+    Enhancer    15
+        Damage  151
+        Range   152
+        Crit    153
+        Precision   154
+
 Area Enhancer   2
-    Screen
-    Velocity
-    Enhancer
-Extender Enhancer   3
-    Screen
-    Velocity
+    Screen  21
+        EM  211
+        Heat    212
+        Kinetic 213
+    Screen(adaptive) 22
+    Velocity    23
+    Enhancer    24
+        Damage  241
+        Range   242
+        Crit    243
+        Precision   244
+
+Extended Enhancer   3
+    Screen 31
+        EM  311
+        Heat    312
+        Kinetic 313
+    Velocity 32
+
 Recharger   4
-    Shield
-    Energy
-Extended Recharger  5
-    Shield
-    Energy
-Area Recharger  6
-    Shield
-    Energy
+    Shield  41
+    Energy  42
+
+Area Recharger  5
+    Shield  51
+    Energy  52
+
+Extended Recharger  6
+    Shield  61
+    Energy  62
+
 Tactical    7
-    Flashjump
-    Cloak
-    Shield
-    Scanner
+    Flashjump   71
+        Short   711
+        Medium  712
+        Long    713
+    Cloak   72
+    Shield  73
+    Scanner 74
+
 Area Interference   8
-    Screen
-    Velocity
-    Warp
-    Damage
-    Range
-    Precision
-    Signal
-    Neut
+    Screen (adaptive)   81
+    Screen  82
+        EM  821
+        Heat    822
+        Kinetic 823
+    Velocity    83
+    Warp    84
+    Damage  85
+    Range   86
+    Precision   97
+    Signal  88
+    Neut    89
 Extended Interference   9
-    Screen
-    Velocity
-    Warp
-    Damage
-    Range
-    Precision
-    Signal
-    Neut
+    Screen (adaptive)   91
+    Screen  92
+        EM  921
+        Heat    922
+        Kinetic 923
+    Velocity    93
+    Warp    94
+    Damage  95
+    Range   96
+    Precision   97
+    Signal  98
+    Neut    99
 
 
 ARTILLERY - 0
@@ -51,6 +88,6 @@ LASERS - 1
 BLASTERS - 2
 70-10-20
 MISSILES - 3
-0-60-40
+0-60-   40
 RAILGUNS - 4
 25-75-0

@@ -1,5 +1,12 @@
 import math
 
+def reader(target):
+    json_data = open(target).read()
+    return json.loads(json_data)
+
+GunDB = reader('Guns.json')
+ShipDB = reader('Ships.json')
+
 class Ship():
     def __init__(self,db,char):
         self.db = db
@@ -33,9 +40,9 @@ class Ship():
         self.addGun(self.artillery)
     def applySkills(self,char):
         self.reset()
-        if char.skills()['Ships'][self.race][0][self.type] > 3:
+        if char.researches()['Ships'][self.race][0][self.type] > 3:
             self.devCap = 3
-            if char.skills()['Ships'][self.race][0][self.type] > 5:
+            if char.researches()['Ships'][self.race][0][self.type] > 5:
                 self.comCap = self.comCap + 1
     def addGun(self,gundb):
         gun = Gun(gundb,self.char)
@@ -102,7 +109,7 @@ TestShipDB = {
             "tech" : 0,
             "rank" : 0,
             "damage" : 18,
-            "damages" : False,
+            "damages" : [6,6,6],
             "cooldown" : 1,
             "range" : 9,
             'precision' : 0,
@@ -119,10 +126,10 @@ TestShipDB = {
         }
     }
 }
-GunDB = {
+TestGunDB = {
     "artillery": {
         "damage": 18,
-        "damages": False,
+        "damages": [6,6,6,],
         "cooldown": 1,
         "range": 9,
         'precision': 0,
@@ -162,7 +169,7 @@ GunDB = {
 
 class Character:
     def __init__(self):
-        self.skill = {
+        self.research = {
             "Ships": {
                 "OE" : [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
                 "NEF" : [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
@@ -194,8 +201,29 @@ class Character:
                 'Propulsion Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
             }
         }
+        self.skill = {
+            "Weapon":{
+                "Railgun":[[0,0,0],[0,0,0],[0,0,0]],
+                "Launcher":[[0,0,0],[0,0,0],[0,0,0]],
+                "Laser":[[0,0,0],[0,0,0],[0,0,0]],
+                "Blaster":[[0,0,0],[0,0,0],[0,0,0]]
+                },
+            "Defense":{
+                "Resistance": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                "Recharge": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+            },
+            "Electronics": {
+                "Energy": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                "Recharge": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+            },
+            "Ship Piloting":{
+                "Propulsion": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+            }
+        }
     def skills(self):
         return self.skill
+    def researches(self):
+        return self.research
 
 clean = Character()
 
@@ -249,17 +277,39 @@ class Gun():
             return((self.ammo/self.ammoUsage)*self.cooldown)
 
 class Device():
-    def __init__(self, db):
-        type = db['type']
-        processor =  db['processor']
-        power =  db['power']
-        limits =  db['limits']
-    def fitting(self):
-        return([processor,power])
+    def __init__(self,db,char):
+        self.db = db
+        self.applySkills(char)
+    def applySkills(self):
+        self.reset()
+    def reset(self):
+        self.processor = self.db['processor']
+        self.power = self.db['power']
+        self.tech = self.db['tech']
+        self.rank = self.db['rank']
+        self.type = self.db['type']
+        self.effect = self.db['effect']
+        self.activation = self.db['activation']
+        self.cooldown = self.db['cooldown']
+        self.effectTime = self.db['effectTime']
+
+class Component():
+    def __init__(self,db,char):
+        self.db = db
+        self.applySkills(char)
+    def applySkills(self):
+        self.reset()
+    def reset(self):
+        self.processor = self.db['processor']
+        self.power = self.db['power']
+        self.tech = self.db['tech']
+        self.rank = self.db['rank']
+        self.type = self.db['type']
+        self.effect = self.db['effect']
 
 myship = Ship(TestShipDB['Covert'],clean)
-myship.addGun(GunDB['S-Combat Railgun I 1'])
-myship.addGun(GunDB['S-Combat Railgun I 1'])
-myship.addGun(GunDB['S-Combat Railgun I 1'])
+myship.addGun(TestGunDB['S-Combat Railgun I 1'])
+myship.addGun(TestGunDB['S-Combat Railgun I 1'])
+myship.addGun(TestGunDB['S-Combat Railgun I 1'])
 print(myship.dpsResist([0.5,0.5,0.5]))
 print(myship.dps)

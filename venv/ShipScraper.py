@@ -102,6 +102,7 @@ def parse(data):
             listNums = map(int, re.findall('\d+', each.text))
             listN = list(listNums)
             ship['artillery']['damage'] = listN.pop()
+            ship['artillery']['damages'] = [ship['artillery']['damage']/3,ship['artillery']['damage']/3,ship['artillery']['damage']/3]
             ship['artillery']['range'] = listN.pop()
             ship['artillery']['name'] = names[ship['type']] + " Std Artillery"
     print(ship)
