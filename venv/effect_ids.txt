@@ -1,0 +1,141 @@
+Ship    000
+    Armor   1
+    Shield  2
+    Processor   3
+    Power   4
+    Resistances 5
+    Warp Stab   6
+    Warp Speed  7
+    Speed   8
+    Energy  9
+    Energy Recovery 10
+    Agility 11
+    Volume  12
+    Shield Recovery 13
+    Cargo   14
+
+Gun 100
+    Artillery   100
+        Cooldown    101
+        Damage  102
+        Range   103
+        Tracking    104
+        Crit Dmg    105
+        Crit Rate   106
+    Lasers  110
+        Cooldown    111
+        Damage  112
+        Range   113
+        Tracking    114
+        Crit Dmg    115
+        Crit Rate   116
+    Blasters    120
+        Cooldown    121
+        Damage  122
+        Range   123
+        Tracking    124
+        Crit Dmg    125
+        Crit Rate   126
+    Missiles    130
+        Cooldown    131
+        Damage  132
+        Range   133
+        Tracking    134
+        Crit Dmg    135
+        Crit Rate   136
+    Railguns    140
+        Cooldown    141
+        Damage  142
+        Range   143
+        Tracking    144
+        Crit Dmg    145
+        Crit Rate   146
+
+Effect  1
+Cooldown    2
+Activation  3
+Range   4
+
+Device 100-1000
+    Enhancer    100
+        Thruster    110
+        Agility Thruster    120
+        Screen (spec)   13
+            EM  131
+            Heat    132
+            Kinetic 133
+        Screen (Adaptive)   140
+        Enhancer    15
+            Damage  151
+            Range   152
+            Crit    153
+            Precision   154
+    Area Enhancer   200
+        Screen  21
+            EM  211
+            Heat    212
+            Kinetic 213
+        Screen(adaptive) 220
+        Velocity    230
+        Enhancer    24
+            Damage  241
+            Range   242
+            Crit    243
+            Precision   244
+
+    Extended Enhancer   300
+        Screen 31
+            EM  311
+            Heat    312
+            Kinetic 313
+        Velocity 320
+
+    Recharger   400
+        Shield  410
+        Energy  420
+
+    Area Recharger  500
+        Shield  510
+        Energy  520
+
+    Extended Recharger  600
+        Shield  610
+        Energy  620
+
+    Tactical    700
+        Flashjump   71
+            Short   711
+            Medium  712
+            Long    713
+        Cloak   720
+        Shield  730
+        Scanner 740
+
+    Area Interference   800
+        Screen (adaptive)   810
+        Screen  82
+            EM  821
+            Heat    822
+            Kinetic 823
+        Velocity    830
+        Warp    840
+        Damage  850
+        Range   860
+        Precision   970
+        Signal  880
+        Neut    890
+    Extended Interference   9
+        Screen (adaptive)   910
+        Screen  92
+            EM  921
+            Heat    922
+            Kinetic 923
+        Velocity    930
+        Warp    940
+        Damage  950
+        Range   960
+        Precision   970
+        Signal  980
+        Neut    990
+
+

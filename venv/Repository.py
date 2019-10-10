@@ -1,4 +1,5 @@
 import math
+import json
 
 def reader(target):
     json_data = open(target).read()
@@ -19,19 +20,19 @@ research_multipliers = {
     "Weapons": {
         'Blasters': [[1.8, 1.8, 1.8], [3, 3, 3], [4,4,4]],
         'BlastersAdv': [[10, 2, 3], [17.5, 3.5, 5], [22.5, 4.5, 7]],
-        'Lasers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'LasersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'Railguns': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'RailgunsAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'Missiles': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'MissilesAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'General': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'Artillery': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        'Lasers': [[1.8, 1.8, 1.8], [3, 3, 3], [4,4,4]],
+        'LasersAdv': [[10, 2, 3], [17.5, 3.5, 5], [22.5, 4.5, 7]],
+        'Railguns': [[1.8, 1.8, 1.8], [3, 3, 3], [4,4,4]],
+        'RailgunsAdv': [[10, 2, 3], [17.5, 3.5, 5], [22.5, 4.5, 7]],
+        'Missiles': [[1.8, 1.8, 1.8], [3, 3, 3], [4,4,4]],
+        'MissilesAdv': [[10, 2, 3], [17.5, 3.5, 5], [22.5, 4.5, 7]],
+        'General': [[10, 2, 2], [17.5, 3.5, 3.5], [22.5, 4.5, 4.5]],
+        'Artillery': [[10, 2, 2], [17.5, 3.5, 5.25], [22.5, 4.5, 6.75]]
     },
     'Engineering': {
-        'Ship Core': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'Energy Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-        'Energy Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Ship Core': [[6, 5, 5], [10.5, 8.75, 8.75], [13.5, 11.25, 11.25]],
+        'Energy Basics': [[3, 3, 6], [5.25, 5.25, 10.5], [6.75, 6.75, 13.5]],
+        'Energy Adv': [[3, 2, 6], [5.25, 3.5, 10.5], [6.75, 4.5, 13.5]],
         'Shield Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         'Shield Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         'Resistance Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
@@ -39,6 +40,15 @@ research_multipliers = {
         'Tactical Shield': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         'Propulsion Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         'Propulsion Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    },
+    'Electronics': {
+        'Weapon Reinforcement': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Fire-Control Reinforcement': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Core Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Weapon Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Fire-Control Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Propulsion Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Directional Scanning': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
     }
 }
 
@@ -72,6 +82,15 @@ research_effects = {
         'Tactical Shield': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         'Propulsion Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         'Propulsion Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    },
+    'Electronics': {
+        'Weapon Reinforcement': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Fire-Control Reinforcement': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Core Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Weapon Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Fire-Control Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Propulsion Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Directional Scanning': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
     }
 }
 
@@ -110,9 +129,11 @@ class Ship():
         self.attributes = [self.armor,self.shield,self.processor,self.power,self.resistances,self.warpStab,self.warpSpeed,self.speed,self.energy,self.recovery,self.agility,self.volume,self.shieldRecovery,self.cargo]
     def applySkills(self,char):
         self.reset()
-        if char.researches()['Ships'][self.race][0][self.type] > 3:
+        if char.licenses()[self.race][self.tech][self.type] == 0:
+            print("no license")
+        elif char.licenses()[self.race][self.tech][self.type] > 3:
             self.devCap = 3
-            if char.researches()['Ships'][self.race][0][self.type] > 5:
+            if char.licenses()[self.race][self.tech][self.type] > 5:
                 self.comCap = self.comCap + 1
     def addGun(self,gundb):
         gun = Gun(gundb,self.char)
@@ -171,6 +192,7 @@ TestShipDB = {
         "warpSpeed" : 10.58,
         "speed" : 688,
         "energy" : 1241,
+        "cargo" : 100,
         "energyRecovery" : 12,
         "agility" : 693,
         "volume" : 140,
@@ -269,7 +291,22 @@ class Character:
                 'Tactical Shield': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Propulsion Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Propulsion Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+            },
+            'Electronics': {
+                'Weapon Reinforcement': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Fire-Control Reinforcement': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Core Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Weapon Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Fire-Control Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Propulsion Suppression': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Directional Scanning': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
             }
+        }
+        self.license = {
+            "OE": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+            "NEF": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+            "ECD": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+            "RS": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         }
         self.skill = {
             "Weapon":{
@@ -294,6 +331,8 @@ class Character:
         return self.skill
     def researches(self):
         return self.research
+    def licenses(self):
+        return self.license
 
 clean = Character()
 
