@@ -7,6 +7,74 @@ def reader(target):
 GunDB = reader('Guns.json')
 ShipDB = reader('Ships.json')
 
+sequence = [0.18,0.31,0.475,0.695,1]
+
+research_multipliers = {
+    "Ships": {
+        "OE": [[6, 6, 6, 6, 6], [10.5, 10.5, 10.5, 10.5, 10.5], [13.5, 13.5, 13.5, 13.5, 13.5]],
+        "NEF": [[6, 6, 6, 6, 6], [10.5, 10.5, 10.5, 10.5, 10.5], [13.5, 13.5, 13.5, 13.5, 13.5]],
+        "ECD": [[6, 6, 6, 6, 6], [10.5, 10.5, 10.5, 10.5, 10.5], [13.5, 13.5, 13.5, 13.5, 13.5]],
+        "RS": [[6, 6, 6, 6, 6], [10.5, 10.5, 10.5, 10.5, 10.5], [13.5, 13.5, 13.5, 13.5, 13.5]]
+    },
+    "Weapons": {
+        'Blasters': [[1.8, 1.8, 1.8], [3, 3, 3], [4,4,4]],
+        'BlastersAdv': [[10, 2, 3], [17.5, 3.5, 5], [22.5, 4.5, 7]],
+        'Lasers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'LasersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Railguns': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'RailgunsAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Missiles': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'MissilesAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'General': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Artillery': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    },
+    'Engineering': {
+        'Ship Core': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Energy Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Energy Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Shield Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Shield Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Resistance Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Resistance Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Tactical Shield': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Propulsion Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Propulsion Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    }
+}
+
+research_effects = {
+    "Ships": {
+        "OE": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+        "NEF": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+        "ECD": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+        "RS": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+    },
+    "Weapons": {
+        'Blasters': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'BlastersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Lasers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'LasersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Railguns': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'RailgunsAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Missiles': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'MissilesAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'General': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Artillery': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    },
+    'Engineering': {
+        'Ship Core': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Energy Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Energy Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Shield Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Shield Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Resistance Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Resistance Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Tactical Shield': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Propulsion Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+        'Propulsion Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    }
+}
+
 class Ship():
     def __init__(self,db,char):
         self.db = db
@@ -30,6 +98,7 @@ class Ship():
         self.agility =  self.db['agility']
         self.volume =  self.db['volume']
         self.shieldRecovery =  self.db['shieldRecovery']
+        self.cargo = self.db['cargo']
         self.artillery = self.db['artillery']
         self.dps = 0
         self.devices = []
@@ -38,6 +107,7 @@ class Ship():
         self.components = []
         self.gunNames = []
         self.addGun(self.artillery)
+        self.attributes = [self.armor,self.shield,self.processor,self.power,self.resistances,self.warpStab,self.warpSpeed,self.speed,self.energy,self.recovery,self.agility,self.volume,self.shieldRecovery,self.cargo]
     def applySkills(self,char):
         self.reset()
         if char.researches()['Ships'][self.race][0][self.type] > 3:

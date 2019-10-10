@@ -96,6 +96,8 @@ def parse(data):
             ship['warpStab'] = intextract(each.text)
         if 'Initial Speed' in each.text:
             ship['speed'] = intextract(each.text)
+        if 'Cargo Space' in each.text:
+            ship['cargo'] = intextract(each.text)
     yeet = data.html.find(".config_con > li")
     for each in yeet:
         if 'Artillery' in each.text:

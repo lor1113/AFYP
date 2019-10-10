@@ -1,0 +1,44 @@
+Ship    000
+    Armor   1
+    Shield  2
+    Processor   3
+    Power   4
+    Resistances 5
+    Warp Stab   6
+    Warp Speed  7
+    Speed   8
+    Energy  9
+    Energy Recovery 10
+    Agility 11
+    Volume  12
+    Shield Recovery 13
+    Cargo   14
+Gun 100
+    Artillery   100
+        Damage  101
+        Range   102
+        Tracking    103
+    Lasers  110
+        Cooldown    111
+        Damage  112
+        Range   113
+        Tracking    114
+    Blasters    120
+        Cooldown    121
+        Damage  122
+        Range   123
+        Tracking    124
+    Missiles    130
+        Cooldown    131
+        Damage  132
+        Range   133
+        Tracking    134
+    Railguns    140
+        Cooldown    141
+        Damage  142
+        Range   143
+        Tracking    144
+
+Devices 200
+
+
