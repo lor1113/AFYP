@@ -4,6 +4,69 @@ import json
 
 types = ["Enhancer","Area Enhancer","Extended Enhancer","Recharger","Area Recharger","Extended Recharger","Tactical","Area Interference","Extended Interference"]
 
+effects = {
+    110: 8,
+    120: 8,
+    131: 31,
+    132: 32,
+    133: 33,
+    140: 5,
+    151: 52,
+    152: 53,
+    153: 56,
+    154: 54,
+    211: 31,
+    212: 32,
+    213: 33,
+    220: 5,
+    230: 8,
+    241: 52,
+    242: 53,
+    243: 56,
+    244: 54,
+    311: 31,
+    312: 32,
+    313: 33,
+    320: 5,
+    330: 8,
+    410: 13,
+    420: 10,
+    510: 13,
+    520: 10,
+    610: 13,
+    620: 10,
+    711: 0,
+    712: 0,
+    713: 0,
+    720: 0,
+    730: 2,
+    741: 0,
+    742: 0,
+    743: 0,
+    810: 3,
+    821: 31,
+    822: 32,
+    823: 33,
+    830: 8,
+    840: 6,
+    850: 52,
+    860: 53,
+    870: 54,
+    880: 12,
+    890: 10,
+    910: 3,
+    921: 31,
+    922: 32,
+    923: 33,
+    930: 8,
+    940: 6,
+    950: 52,
+    960: 53,
+    970: 54,
+    980: 12,
+    990: 10,
+}
+
 form = {
     'appId': 1,
     'order': 1,
@@ -39,12 +102,12 @@ def parse(data):
         device['name'] = name
         if 'Thruster' in name:
             if 'Agility' in name:
-                device['id'] = id+2
+                device['id'] = 110
             else:
-                device['id'] = id+1
+                device['id'] = 120
         if 'Screen' in name:
             if 'Adaptive' in name:
-                device['id'] = id+4
+                device['id'] = 140
             else:
                 if 'EM' in name:
                     device['id'] = 131
@@ -95,7 +158,7 @@ def parse(data):
         device['name'] = name
         if 'Field' in name:
             if 'Adaptive' in name:
-                device['id'] = id+2
+                device['id'] = 220
             else:
                 if 'EM' in name:
                     device['id'] = 211
@@ -104,7 +167,7 @@ def parse(data):
                 if 'Kinetic' in name:
                     device['id'] = 213
         if 'Velocity' in name:
-            device['id'] = 23
+            device['id'] = 230
         if 'Link' in name:
             if 'Damage' in name:
                 device['id'] = 241
@@ -146,7 +209,7 @@ def parse(data):
         device['name'] = name
         if 'Res' in name:
             if 'Adaptive' in name:
-                device['id'] = id+1
+                device['id'] = 320
             else:
                 if 'EM' in name:
                     device['id'] = 311
@@ -155,7 +218,7 @@ def parse(data):
                 if 'Kinetic' in name:
                     device['id'] = 313
         elif 'Velocity' in name:
-            device['id'] = 32
+            device['id'] = 330
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -184,9 +247,9 @@ def parse(data):
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Shield' in name:
-            device['id'] = 41
+            device['id'] = 410
         elif 'Energy' in name:
-            device['id'] = 42
+            device['id'] = 420
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -216,9 +279,9 @@ def parse(data):
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Shield' in name:
-            device['id'] = 51
+            device['id'] = 510
         elif 'Energy' in name:
-            device['id'] = 52
+            device['id'] = 520
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -250,9 +313,9 @@ def parse(data):
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Shield' in name:
-            device['id'] = 61
+            device['id'] = 610
         elif 'Energy' in name:
-            device['id'] = 62
+            device['id'] = 620
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -289,11 +352,16 @@ def parse(data):
             if 'Long' in name:
                 device['id'] = 713
         elif 'Cloaking' in name:
-            device['id'] = 72
+            device['id'] = 720
         elif 'Generator' in name:
-            device['id'] = 73
+            device['id'] = 730
         elif 'Scanner' in name:
-            device['id'] = 74
+            if 'Radio' in name:
+                device['id'] = 741
+            if 'EM' in name:
+                device['id'] = 742
+            if 'Gravitational' in name:
+                device['id'] = 743
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -310,7 +378,7 @@ def parse(data):
                 device['activation'] = intextract(each.text)
             if 'Cooldown' in each.text:
                 device['cooldown'] = intextract(each.text)
-        if device['id'] > 700:
+        if device['id'] < 720:
             for each in data.html.find(".fl.dis_l"):
                 words = each.text.split()
                 for each in words:
@@ -320,7 +388,7 @@ def parse(data):
                             words.remove(each)
                         if '%' in each:
                             device['effect'] = intextract(each)
-        elif device['id'] == 72:
+        elif device['id'] == 720:
             device['effect'] = 0
             for each in data.html.find(".fl.dis_l"):
                 words = each.text.split()
@@ -328,7 +396,7 @@ def parse(data):
                     if num_there(each):
                         if 's' in each:
                             device['effectTime'] = intextract(each)
-        elif device['id'] == 73:
+        elif device['id'] == 730:
             for each in data.html.find(".fl.dis_l"):
                 words = each.text.split()
                 for each in words:
@@ -338,7 +406,7 @@ def parse(data):
                             words.remove(each)
                 word = ''.join(words)
                 device['effect'] = intextract(word)
-        elif device['id'] == 74:
+        elif device['id'] == 740:
             device['effectTime'] = 0
             device['effect'] = intextract(data.html.find(".fl.dis_l",first=True).text)
     elif id == 80:
@@ -347,7 +415,7 @@ def parse(data):
         device['name'] = name
         if 'Res' in name:
             if 'Adaptive' in name:
-                device['id'] = id+1
+                device['id'] = 810
             else:
                 if 'EM' in name:
                     device['id'] = 821
@@ -355,20 +423,20 @@ def parse(data):
                     device['id'] = 822
                 if 'Kinetic' in name:
                     device['id'] = 823
-        if 'Velocity' in name:
-            device['id'] = 83
+        if 'Propulsion' in name:
+            device['id'] = 830
         if 'Warp' in name:
-            device['id'] = 84
+            device['id'] = 840
         if 'Damage' in name:
-             device['id'] = 85
+             device['id'] = 850
         if 'Range' in name:
-            device['id'] = 86
+            device['id'] = 860
         if 'Precision' in name:
-            device['id'] = 87
+            device['id'] = 870
         if 'Signal' in name:
-            device['id'] = 88
+            device['id'] = 880
         if 'Nullification' in name:
-            device['id'] = 89
+            device['id'] = 890
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -402,28 +470,28 @@ def parse(data):
         device['name'] = name
         if 'Res' in name:
             if 'Adaptive' in name:
-                device['id'] = id+1
+                device['id'] = 910
             else:
                 if 'EM' in name:
-                    device['id'] = 821
+                    device['id'] = 921
                 if 'Thermal' in name:
-                    device['id'] = 822
+                    device['id'] = 922
                 if 'Kinetic' in name:
-                    device['id'] = 823
-        if 'Velocity' in name:
-            device['id'] = 83
+                    device['id'] = 923
+        if 'Propulsion' in name:
+            device['id'] = 930
         if 'Warp' in name:
-            device['id'] = 84
+            device['id'] = 940
         if 'Damage' in name:
-             device['id'] = 85
+             device['id'] = 950
         if 'Range' in name:
-            device['id'] = 86
+            device['id'] = 960
         if 'Precision' in name:
-            device['id'] = 87
+            device['id'] = 970
         if 'Signal' in name:
-            device['id'] = 88
-        if 'Nullification' in name:
-            device['id'] = 89
+            device['id'] = 980
+        if 'Nullifier' in name:
+            device['id'] = 990
         for each in data.html.find(".weapon_inner_show_desc.fl > p"):
             if 'Tech Level' in each.text:
                 device['tech'] = intextract(each.text)
@@ -449,10 +517,11 @@ def parse(data):
                         words.remove(each)
             word = ''.join(words)
             device['effect'] = intextract(word)
-    devices[name] = device
     if device['tech'] == 1:
         if device['rank'] == 1:
             print(device)
+    device['effects'] =effects[device['id']]
+    devices[name] = device
 
 for each in types:
     id = (types.index(each) + 1)*10

@@ -1,83 +1,87 @@
-Enhancer    1
-    Thruster    11
-    Agility Thruster    12
-    Screen (spec)   13
+Enhancer    100
+    Thruster    110
+    Agility Thruster    120
+    Screen (spec)   130
         EM  131
         Heat    132
         Kinetic 133
-    Screen (Adaptive)   14
-    Enhancer    15
+    Screen (Adaptive)   140
+    Enhancer    150
         Damage  151
         Range   152
         Crit    153
         Precision   154
 
-Area Enhancer   2
-    Screen  21
+Area Enhancer   200
+    Screen  210
         EM  211
         Heat    212
         Kinetic 213
-    Screen(adaptive) 22
-    Velocity    23
-    Enhancer    24
+    Screen(adaptive) 220
+    Velocity    230
+    Enhancer    240
         Damage  241
         Range   242
         Crit    243
         Precision   244
 
-Extended Enhancer   3
-    Screen 31
+Extended Enhancer   300
+    Screen 310
         EM  311
         Heat    312
         Kinetic 313
-    Velocity 32
+    Screen(adaptive) 320
+    Velocity 330
 
-Recharger   4
-    Shield  41
-    Energy  42
+Recharger   400
+    Shield  410
+    Energy  420
 
-Area Recharger  5
-    Shield  51
-    Energy  52
+Area Recharger  500
+    Shield  510
+    Energy  520
 
-Extended Recharger  6
-    Shield  61
-    Energy  62
+Extended Recharger  600
+    Shield  610
+    Energy  620
 
-Tactical    7
-    Flashjump   71
+Tactical    700
+    Flashjump   710
         Short   711
         Medium  712
         Long    713
-    Cloak   72
-    Shield  73
-    Scanner 74
+    Cloak   720
+    Shield  730
+    Scanner 740
+        Radiation 741
+        EM 742
+        Gravitational 743
 
-Area Interference   8
-    Screen (adaptive)   81
-    Screen  82
+Area Interference   800
+    Screen (adaptive)   810
+    Screen  820
         EM  821
         Heat    822
         Kinetic 823
-    Velocity    83
-    Warp    84
-    Damage  85
-    Range   86
-    Precision   97
-    Signal  88
-    Neut    89
-Extended Interference   9
-    Screen (adaptive)   91
-    Screen  92
+    Velocity    830
+    Warp    840
+    Damage  850
+    Range   860
+    Precision   870
+    Signal  880
+    Neut    890
+Extended Interference   900
+    Screen (adaptive)   910
+    Screen  920
         EM  921
         Heat    922
         Kinetic 923
-    Velocity    93
-    Warp    94
-    Damage  95
-    Range   96
-    Precision   97
-    Signal  98
-    Neut    99
+    Velocity    930
+    Warp    940
+    Damage  950
+    Range   960
+    Precision   970
+    Signal  980
+    Neut    990
 
 

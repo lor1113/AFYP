@@ -44,6 +44,12 @@ def parse(data):
         gun['type'] = 3
     if 'Railgun' in name:
         gun['type'] = 4
+    if 'S-' in name:
+        gun['id'] = 50 + (10*gun['type']) + 1
+    if 'M-' in name:
+        gun['id'] = 50 + (10*gun['type']) + 2
+    if 'L-' in name:
+        gun['id'] = 50 + (10*gun['type']) + 3
     for each in data.html.find(".weapon_inner_list_list > li"):
         if 'Damage Per Cycle' in each.text:
             gun['damage'] = intextract(each.text)
@@ -78,6 +84,7 @@ def parse(data):
             gun['tech'] = intextract(each.text)
         if 'Rank' in each.text:
             gun['rank'] = intextract(each.text)
+    gun["critDmg"] = 2
     print(gun)
     guns[name + " " + str(gun['rank'])] = gun
 

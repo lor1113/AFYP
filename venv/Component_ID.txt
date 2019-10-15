@@ -1,0 +1,25 @@
+1000-2000
+All
+    Crit Dmg
+    Crit Rate
+Lasers
+    Damage
+    Tracking
+    Crit Dmg
+Blasters
+    Damage
+    Tracking
+    Crit Dmg
+Missiles
+    Damage
+    Tracking
+    Crit Dmg
+Railguns
+    Damage
+    Tracking
+    Crit Dmg
+Artillery
+    Damage
+    Tracking
+    Crit Dmg
+    Crit Rate

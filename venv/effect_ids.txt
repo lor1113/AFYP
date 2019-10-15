@@ -1,9 +1,12 @@
 Ship    000
     Armor   1
     Shield  2
-    Processor   3
-    Power   4
-    Resistances 5
+    Resistances 3
+        EM  31
+        Thermal 32
+        Kinetic 33
+    Processor   4
+    Power   5
     Warp Stab   6
     Warp Speed  7
     Speed   8
@@ -13,43 +16,35 @@ Ship    000
     Volume  12
     Shield Recovery 13
     Cargo   14
+    Standard Thruster Power 15
 
-Gun 100
+Cooldown    1
+Damage  2
+Range   3
+Tracking    4
+Crit Dmg    5
+Crit Rate   6
+Activation  7
+
+Gun 50-100
+    All 50
+    Lasers  60
+        S   61
+        M   62
+        L   63
+    Blasters    70
+        S   71
+        M   72
+        L   73
+    Missiles    80
+        S   81
+        M   82
+        L   83
+    Railguns    90
+        S   91
+        M   92
+        L   93
     Artillery   100
-        Cooldown    101
-        Damage  102
-        Range   103
-        Tracking    104
-        Crit Dmg    105
-        Crit Rate   106
-    Lasers  110
-        Cooldown    111
-        Damage  112
-        Range   113
-        Tracking    114
-        Crit Dmg    115
-        Crit Rate   116
-    Blasters    120
-        Cooldown    121
-        Damage  122
-        Range   123
-        Tracking    124
-        Crit Dmg    125
-        Crit Rate   126
-    Missiles    130
-        Cooldown    131
-        Damage  132
-        Range   133
-        Tracking    134
-        Crit Dmg    135
-        Crit Rate   136
-    Railguns    140
-        Cooldown    141
-        Damage  142
-        Range   143
-        Tracking    144
-        Crit Dmg    145
-        Crit Rate   146
 
 Effect  1
 Cooldown    2
@@ -70,6 +65,7 @@ Device 100-1000
             Range   152
             Crit    153
             Precision   154
+
     Area Enhancer   200
         Screen  21
             EM  211
@@ -88,7 +84,8 @@ Device 100-1000
             EM  311
             Heat    312
             Kinetic 313
-        Velocity 320
+        Screen (adaptive) 320
+        Velocity 330
 
     Recharger   400
         Shield  410
@@ -110,6 +107,10 @@ Device 100-1000
         Cloak   720
         Shield  730
         Scanner 740
+            Radiation 741
+            EM 742
+            Gravitational 743
+
 
     Area Interference   800
         Screen (adaptive)   810

@@ -1,0 +1,19 @@
+Gun 50-100
+    All 50
+    Lasers  60
+        S   61
+        M   62
+        L   63
+    Blasters    70
+        S   71
+        M   72
+        L   73
+    Missiles    80
+        S   81
+        M   82
+        L   83
+    Railguns    90
+        S   91
+        M   92
+        L   93
+    Artillery   100
