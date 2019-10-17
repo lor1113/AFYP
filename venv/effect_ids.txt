@@ -17,6 +17,8 @@ Ship    000
     Shield Recovery 13
     Cargo   14
     Standard Thruster Power 15
+    Shield (Additive)   22
+    Energy (Additive)   29
 
 Cooldown    1
 Damage  2
@@ -110,7 +112,6 @@ Device 100-1000
             Radiation 741
             EM 742
             Gravitational 743
-
 
     Area Interference   800
         Screen (adaptive)   810

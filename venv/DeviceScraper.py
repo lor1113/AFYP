@@ -39,7 +39,7 @@ effects = {
     712: 0,
     713: 0,
     720: 0,
-    730: 2,
+    730: 22,
     741: 0,
     742: 0,
     743: 0,
@@ -102,9 +102,11 @@ def parse(data):
         device['name'] = name
         if 'Thruster' in name:
             if 'Agility' in name:
-                device['id'] = 110
-            else:
                 device['id'] = 120
+                device['effect2'] = 20
+                device['effects2'] = 11
+            else:
+                device['id'] = 110
         if 'Screen' in name:
             if 'Adaptive' in name:
                 device['id'] = 140
@@ -517,10 +519,19 @@ def parse(data):
                         words.remove(each)
             word = ''.join(words)
             device['effect'] = intextract(word)
+    if 'range' not in device:
+        device['range'] = 0
+    if 'effect2' not in device:
+        device['effect2'] = 0
+    if 'effects2' not in device:
+        device['effects2'] = 0
+    device['effects'] =effects[device['id']]
     if device['tech'] == 1:
         if device['rank'] == 1:
             print(device)
-    device['effects'] =effects[device['id']]
+    if device['tech'] == 3:
+        if device['rank'] == 5:
+            print(device)
     devices[name] = device
 
 for each in types:

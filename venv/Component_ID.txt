@@ -1,25 +1,74 @@
 1000-2000
-All
-    Crit Dmg
-    Crit Rate
-Lasers
-    Damage
-    Tracking
-    Crit Dmg
-Blasters
-    Damage
-    Tracking
-    Crit Dmg
-Missiles
-    Damage
-    Tracking
-    Crit Dmg
-Railguns
-    Damage
-    Tracking
-    Crit Dmg
-Artillery
-    Damage
-    Tracking
-    Crit Dmg
-    Crit Rate
+
+Gun 1000-1500
+    All 1000
+        Crit Dmg    1005
+        Crit Rate   1006
+    Lasers  1100
+        Damage  1102
+        Range   1103
+        Tracking    1104
+        Crit Dmg    1105
+    Blasters    1200
+        Damage  1202
+        Range   1203
+        Tracking    1204
+        Crit Dmg    1205
+    Missiles    1300
+        Damage  1302
+        Range   1303
+        Tracking    1304
+        Crit Dmg    1305
+    Railguns    1400
+        Damage  1402
+        Range   1403
+        Tracking    1404
+        Crit Dmg    1405
+    Artillery   1500
+        Damage  1502
+        Range   1503
+        Tracking    1504
+
+Electronics 1600
+    Processor 1610
+    Power Core 1620
+    Battery 1630
+        S   1631
+        M   1632
+        L   1632
+    ERA  1640
+    EPA 1650
+
+Shield Enhancer 1700
+    Shield Extender 1710
+        S   1711
+        M   1712
+        L   1713
+    Shield Power Relay  1720
+        S   1721
+        M   1722
+        L   1723
+    Res Enhancer    1730
+        EM  1731
+        Heat    1732
+        Kinetic 1733
+    Res Enhancer (Adaptive) 1740
+    Res Amplifier   1750
+        EM  1751
+        Heat    1752
+        Kinetic 1753
+    SRA
+        A 1760
+        B 1770
+    SPA 1770
+    SRS 1780
+
+Piloting Enhancer 1800
+    Auxiliary Propulsion    1810
+    Overdrive Thruster  1820
+    Altitude Control Engine 1830
+    Titanium Plating    1840
+    Expanded Cargohold  1850
+    Warp Stab   1860
+    Warp Cover  1870
+    Warp Accel  1880

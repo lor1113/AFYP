@@ -85,7 +85,12 @@ def parse(data):
         if 'Rank' in each.text:
             gun['rank'] = intextract(each.text)
     gun["critDmg"] = 2
-    print(gun)
+    if gun['tech'] == 1:
+        if gun['rank'] == 1:
+            print(gun)
+    if gun['tech'] == 3:
+        if gun['rank'] == 5:
+            print(gun)
     guns[name + " " + str(gun['rank'])] = gun
 
 while form['pageNumber'] <= total:
