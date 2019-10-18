@@ -3,13 +3,6 @@ import json
 import copy
 from pathlib import Path
 
-research_sequence = {}
-skill_sequence = {}
-research_multipliers = {}
-research_effects = {}
-skill_multipliers = {}
-skill_effects = {}
-
 def reader(target):
     json_data = open(target).read()
     return json.loads(json_data)
@@ -31,11 +24,15 @@ def loader(path):
     global research_effects
     global skill_multipliers
     global skill_effects
+    global gunDB
+    global shipDB
+    global componentDB
+    global deviceDB
     folder = Path(path)
-    GunDB = reader(folder / 'Guns.json')
-    ShipDB = reader(folder / 'Ships.json')
-    ComponentDB = reader(folder / 'Components.json')
-    DeviceDB = reader(folder / 'Devices.json')
+    gunDB = reader(folder / 'Guns.json')
+    shipDB = reader(folder / 'Ships.json')
+    componentDB = reader(folder / 'Components.json')
+    deviceDB = reader(folder / 'Devices.json')
     data = reader(folder / 'Data.json')
     research_sequence = data['research_sequence']
     skill_sequence = data['skill_sequence']
@@ -90,12 +87,7 @@ class Ship():
                 self.comCap = self.comCap + 1
         for i in range(len(self.attributes)):
             if i in self.affects.keys():
-                if isinstance(self.affects[i],list):
-                    value = 1
-                    for each in self.affects[i]:
-                        value = value * (1+each/100)
-                else:
-                    value = 1 + self.affects[i]/100
+                value = self.compiler(i,i,self.affects)
                 self.attributes[i] = self.attributes[i] * value
         for i in range(31,34):
             if i in self.affects.keys():
@@ -159,6 +151,21 @@ class Ship():
         for each in self.guns:
             each.applySkills(self.affects)
         self.applySkills()
+    def compiler(self,j,i,matrix):
+        value = 1
+        if j in matrix.keys():
+            if isinstance(matrix[j], list):
+                for each in matrix[j]:
+                    if i == 12:
+                        value = value * (1 - each / 100)
+                    else:
+                        value = value * (1 + each / 100)
+            else:
+                if i == 12:
+                    value = 1 - matrix[j] / 100
+                else:
+                    value = 1 + matrix[j] / 100
+        return value
     def addGun(self,gundb,affects):
         gun = Gun(gundb,affects)
         fitting = gun.fitting()
@@ -464,33 +471,15 @@ class Gun():
         self.reset()
         for i in range(len(self.attributes)):
             j = (self.id*10) + i
-            if j in matrix.keys():
-                if isinstance(matrix[j],list):
-                    value = 1
-                    for each in matrix[j]:
-                        value = value * (1+each/100)
-                else:
-                    value = 1 + matrix[j]/100
-                self.attributes[i] = self.attributes[i] * value
+            value = self.compiler(j, i, matrix)
+            self.attributes[i] = self.attributes[i] * value
             if not self.id == 10:
                 j = 50 + i
-                if j in matrix.keys():
-                    if isinstance(matrix[j],list):
-                        value = 1
-                        for each in matrix[j]:
-                            value = value * (1+each/100)
-                    else:
-                        value = 1 + matrix[j]/100
-                    self.attributes[i] = self.attributes[i] * value
-                j = (round(self.id,-1) * 10) + i
-                if j in matrix.keys():
-                    if isinstance(matrix[j],list):
-                        value = 1
-                        for each in matrix[j]:
-                            value = value * (1+each/100)
-                    else:
-                        value = 1 + matrix[j]/100
-                    self.attributes[i] = self.attributes[i] * value
+                value = self.compiler(j, i, matrix)
+                self.attributes[i] = self.attributes[i] * value
+            j = (round(self.id,-1) * 10) + i
+            value = self.compiler(j, i, matrix)
+            self.attributes[i] = self.attributes[i] * value
         self.cooldown = self.attributes[1]
         self.damage = self.attributes[2]
         self.range = self.attributes[3]
@@ -524,6 +513,21 @@ class Gun():
         return(self.name)
     def fitting(self):
         return([self.processor,self.power])
+    def compiler(self,j,i,matrix):
+        value = 1
+        if j in matrix.keys():
+            if isinstance(matrix[j], list):
+                for each in matrix[j]:
+                    if i == 1 or i == 7:
+                        value = value * (1 - each / 100)
+                    else:
+                        value = value * (1 + each / 100)
+            else:
+                if i == 1 or i == 7:
+                    value = 1 - matrix[j] / 100
+                else:
+                    value = 1 + matrix[j] / 100
+        return value
     def dps(self):
         if self.damages:
             return(((sum(self.damages)/self.cooldown)*(1-self.critChance)) + ((sum(self.damages)/self.cooldown)*(self.critChance*self.critDmg)))
@@ -554,14 +558,8 @@ class Device():
         self.reset()
         for i in range(len(self.attributes)):
             j = self.id * 10 + i
-            if j in matrix.keys():
-                if isinstance(matrix[j],list):
-                    value = 1
-                    for each in matrix[j]:
-                        value = value * (1+each/100)
-                else:
-                    value = 1 + matrix[j]/100
-                self.attributes[i] = self.attributes[i] * value
+            value = self.compiler(i,j,matrix)
+            self.attributes[i] = self.attributes[i] * value
         self.effect = self.attributes[1]
         self.cooldown = self.attributes[2]
         self.activation = self.attributes[3]
@@ -583,10 +581,37 @@ class Device():
         self.effectTime = self.db['effectTime']
         self.attributes = [0,self.effect,self.cooldown,self.activation,self.range]
     def matrixReturn(self):
+        returns = {}
         if self.effects == 3:
-            return {31:self.effect,32:self.effect,33:self.effect,self.effects2:self.effects2}
+            returns[31] = self.effect
+            returns[32] = self.effect
+            returns[33] = self.effect
+        elif isinstance(self.effects, list):
+            for each in self.effects:
+                returns[each] = self.effect
         else:
-            return {self.effects:self.effect,self.effects2:self.effect2}
+            returns[self.effects] = self.effect
+        if isinstance(self.effects2, list):
+            for each in self.effects2:
+                returns[each] = self.effect2
+        else:
+            returns[self.effects2] = self.effect2
+        return returns
+    def compiler(self,j,i,matrix):
+        value = 1
+        if j in matrix.keys():
+            if isinstance(matrix[j], list):
+                for each in matrix[j]:
+                    if i == 2 or i == 3:
+                        value = value * (1 - each / 100)
+                    else:
+                        value = value * (1 + each / 100)
+            else:
+                if i == 2 or i == 3:
+                    value = 1 - matrix[j] / 100
+                else:
+                    value = 1 + matrix[j] / 100
+        return value
     def drain(self):
         return(self.activation/self.cooldown)
     def namer(self):
@@ -612,7 +637,18 @@ class Component():
         self.effects = self.db['effects']
         self.effects2 = self.db['effects2']
     def matrixReturn(self):
-        return {self.effects: self.effect, self.effects2: self.effect2}
+        returns = {}
+        if isinstance(self.effects, list):
+            for each in self.effects:
+                returns[each] = self.effect
+        else:
+            returns[self.effects] = self.effect
+        if isinstance(self.effects2, list):
+            for each in self.effects2:
+                returns[each] = self.effect2
+        else:
+            returns[self.effects2] = self.effect2
+        return returns
     def fitting(self):
         return([self.processor,self.power])
     def namer(self):
@@ -629,7 +665,3 @@ rifter.update(char)
 print(rifter.resistances)
 rifter.addDevice(TestDeviceDB['Adaptive Screen 1'])
 print(rifter.resistances)
-print(rifter.dps())
-rifter.addComponent(TestComponentDB['Artillery Damage Amplifier III 2'])
-print(rifter.dps())
-print(rifter.components)
