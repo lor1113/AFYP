@@ -55,6 +55,7 @@ class Ship():
         self.guns = []
         self.applySkills()
         self.addGun(self.db['artillery'],self.affects)
+        char.ships.append(self)
     def reset(self):
         self.type = self.db['type']
         self.race = self.db['race']
@@ -172,6 +173,8 @@ class Ship():
                 else:
                     value = 1 + matrix[j] / 100
         return value
+    def getAttr(self,id):
+        return self.attributes[id]
     def addGun(self,gundb,affects):
         gun = Gun(gundb,affects)
         fitting = gun.fitting()
@@ -223,6 +226,9 @@ class Ship():
             self.components.append(component)
             self.componentNames.append(component.namer())
             self.recompile(self.char)
+    def setMatrix(self,matrix):
+        self.affects = matrix
+        self.applySkills()
     def dps(self):
         return sum([gun.dps() for gun in self.guns])
     def dpsResist(self,resist):
@@ -230,9 +236,6 @@ class Ship():
     def ammoTime(self):
         times = [gun.ammoTime() for gun in self.guns]
         return min(times)
-    def update(self,char):
-        self.affects = char.affects
-        self.recompile(char)
 
 TestComponentDB = {
     "Artillery Damage Amplifier III 2": {
@@ -354,6 +357,7 @@ TestGunDB = {
 
 class Character:
     def __init__(self):
+        self.ships = []
         self.research = {
             "Ships": {
                 "OE" : [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
@@ -448,6 +452,8 @@ class Character:
     def applySkills(self):
         step1 = self.combo({}, self.research, research_multipliers, research_effects, research_sequence)
         self.affects = self.combo(step1, self.skill,skill_multipliers,skill_effects,skill_sequence)
+        for each in self.ships:
+            each.setMatrix(self.affects)
     def allX(self,x):
         for one in self.research.keys():
             for two in self.research[one].keys():
@@ -459,12 +465,16 @@ class Character:
                 for i in range(len(self.skill[one][two])):
                     for j in range(len(self.skill[one][two][i])):
                         self.skill[one][two][i][j] = x
+        self.applySkills()
     def setSkills(self,skills):
         self.skill = skills
+        self.applySkills()
     def setResearches(self,researches):
         self.research = researches
+        self.applySkills()
     def setLicenses(self,licenses):
         self.license = licenses
+        self.applySkills()
     def skills(self):
         return self.skill
     def researches(self):
@@ -668,12 +678,9 @@ class Component():
 
 loader("DB/1.0/")
 char = Character()
-char.applySkills()
 rifter = Ship(TestShipDB['Covert'],char)
 print(rifter.resistances)
 char.allX(5)
-char.applySkills()
-rifter.update(char)
 print(rifter.resistances)
 rifter.addDevice(TestDeviceDB['Adaptive Screen 1'])
 print(rifter.resistances)
