@@ -100,6 +100,7 @@ def parse(data):
     if id == 10:
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
+        device['effectType'] = 0
         if 'Thruster' in name:
             if 'Agility' in name:
                 device['id'] = 120
@@ -156,6 +157,7 @@ def parse(data):
             device['effectTime'] = intextract(word)
     elif id == 20:
         device = {}
+        device['effectType'] = 2
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Field' in name:
@@ -207,6 +209,7 @@ def parse(data):
             word = ''.join(words)
             device['effect'] = intextract(word)
     elif id == 30:
+        device['effectType'] = 1
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Res' in name:
@@ -246,6 +249,7 @@ def parse(data):
             word = ''.join(words)
             device['effectTime'] = intextract(word)
     elif id == 40:
+        device['effectType'] = 0
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Shield' in name:
@@ -278,6 +282,7 @@ def parse(data):
             word = ''.join(words)
             device['effect'] = intextract(word)
     elif id == 50:
+        device['effectType'] = 2
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Shield' in name:
@@ -312,6 +317,7 @@ def parse(data):
             word = ''.join(words)
             device['effect'] = intextract(word)
     elif id == 60:
+        device['effectType'] = 1
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Shield' in name:
@@ -344,6 +350,7 @@ def parse(data):
             word = ''.join(words)
             device['effect'] = intextract(word)
     elif id == 70:
+        device['effectType'] = 0
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Flashjump' in name:
@@ -413,6 +420,7 @@ def parse(data):
             device['effect'] = intextract(data.html.find(".fl.dis_l",first=True).text)
     elif id == 80:
         device = {}
+        device['effectType'] = 2
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Res' in name:
@@ -468,6 +476,7 @@ def parse(data):
             device['effect'] = intextract(word)
     elif id == 90:
         device = {}
+        device['effectType'] = 1
         name = data.html.find(".weapon_inner_show_desc.fl > h2", first=True).text
         device['name'] = name
         if 'Res' in name:

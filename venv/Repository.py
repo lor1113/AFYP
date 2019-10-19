@@ -3,6 +3,9 @@ import json
 import copy
 from pathlib import Path
 
+options = ["DB/1.0/"]
+default = "DB/1.0/"
+
 def reader(target):
     json_data = open(target).read()
     return json.loads(json_data)
@@ -17,7 +20,7 @@ def find(code, dict):
             rv = rv[int(key)]
     return rv
 
-def loader(path):
+def loader(path = ""):
     global research_sequence
     global skill_sequence
     global research_multipliers
@@ -28,7 +31,10 @@ def loader(path):
     global shipDB
     global componentDB
     global deviceDB
-    folder = Path(path)
+    if path:
+        folder = Path(path)
+    else:
+        folder = Path(default)
     gunDB = reader(folder / 'Guns.json')
     shipDB = reader(folder / 'Ships.json')
     componentDB = reader(folder / 'Components.json')
@@ -47,11 +53,17 @@ class Ship():
         self.db = db
         self.char = char
         self.affects = char.affects
+        self.extendedAffects = {}
+        self.aoeAffects = {}
+        self.base = char.affects
         self.components = []
         self.gunNames = []
+        self.aoeShips = []
+        self.extendedShips = []
         self.componentNames = []
         self.deviceNames = []
         self.devices = []
+        self.updateShips = []
         self.guns = []
         self.applySkills()
         self.addGun(self.db['artillery'],self.affects)
@@ -129,9 +141,58 @@ class Ship():
         self.volume = self.attributes[12]
         self.shieldRecovery = self.attributes[13]
         self.cargo = self.attributes[14]
-    def recompile(self,char):
-        char.applySkills()
-        self.affects = char.affects
+    def compileExtended(self):
+        self.extendedAffects = {}
+        for each in self.devices:
+            rtrn = each.extendedReturn()
+            for each in rtrn.keys():
+                if each in self.extendedAffects:
+                    if isinstance(self.extendedAffects[each],list):
+                        self.extendedAffects[each].append(rtrn[each])
+                    else:
+                        self.extendedAffects[each] = [self.extendedAffects[each],rtrn[each]]
+                else:
+                    self.extendedAffects[each] = rtrn[each]
+        return self.extendedAffects
+    def compileAoe(self):
+        self.aoeAffects = {}
+        for each in self.devices:
+            rtrn = each.aoeReturn()
+            for each in rtrn.keys():
+                if each in self.aoeAffects:
+                    if isinstance(self.aoeAffects[each],list):
+                        self.aoeAffects[each].append(rtrn[each])
+                    else:
+                        self.aoeAffects[each] = [self.aoeAffects[each],rtrn[each]]
+                else:
+                    self.aoeAffects[each] = rtrn[each]
+        return self.aoeAffects
+    def recompile(self,matrix):
+        self.affects = matrix
+        for each in self.aoeShips:
+            each.recompile(each.base)
+            toAppend = each.aoeAffects
+            for each in toAppend.keys():
+                if each in self.affects:
+                    if isinstance(self.affects[each],list):
+                        self.affects[each].append(toAppend[each])
+                    else:
+                        self.affects[each] = [self.affects[each]]
+                        self.affects[each].append(toAppend[each])
+                else:
+                    self.affects[each] = toAppend[each]
+        for each in self.extendedShips:
+            each.recompile(each.base)
+            toAppend = each.extendedAffects
+            for each in toAppend.keys():
+                if each in self.affects:
+                    if isinstance(self.affects[each],list):
+                        self.affects[each].append(toAppend[each])
+                    else:
+                        self.affects[each] = [self.affects[each]]
+                        self.affects[each].append(toAppend[each])
+                else:
+                    self.affects[each] = toAppend[each]
         for each in self.components:
             toAppend = each.matrixReturn()
             for each in toAppend.keys():
@@ -158,7 +219,12 @@ class Ship():
         for each in self.guns:
             each.applySkills(self.affects)
         self.applySkills()
-    def compiler(self,j,i,matrix):
+        self.compileAoe()
+        self.compileExtended()
+        self.affects[0] = 0
+        for each in self.updateShips:
+            each.recompile(each.base)
+    def compiler(self,i,j,matrix):
         value = 1
         if j in matrix.keys():
             if isinstance(matrix[j], list):
@@ -175,6 +241,27 @@ class Ship():
         return value
     def getAttr(self,id):
         return self.attributes[id]
+    def removeGun(self,gun):
+        fitting = gun.fitting()
+        processr = self.processor + fitting[0]
+        powr = self.power + fitting[1]
+        self.guns.remove(gun)
+        self.gunNames.remove(gun.namer())
+        self.recompile(self.base)
+    def removeDevice(self,device):
+        fitting = device.fitting()
+        processr = self.processor + fitting[0]
+        powr = self.power + fitting[1]
+        self.devices.remove(device)
+        self.deviceNames.remove(device.namer())
+        self.recompile(self.base)
+    def removeComponent(self,component):
+        fitting = component.fitting()
+        processr = self.processor + fitting[0]
+        powr = self.power + fitting[1]
+        self.components.remove(component)
+        self.componentNames.remove(component.namer())
+        self.recompile(self.base)
     def addGun(self,gundb,affects):
         gun = Gun(gundb,affects)
         fitting = gun.fitting()
@@ -191,7 +278,7 @@ class Ship():
             self.processor = processr
             self.guns.append(gun)
             self.gunNames.append(gun.namer())
-            self.recompile(self.char)
+            self.recompile(self.base)
     def addDevice(self,devdb):
         device = Device(devdb,self.affects)
         fitting = device.fitting()
@@ -208,7 +295,7 @@ class Ship():
             self.processor = processr
             self.devices.append(device)
             self.deviceNames.append(device.namer())
-            self.recompile(self.char)
+            self.recompile(self.base)
     def addComponent(self,compdb):
         component = Component(compdb,self.affects)
         fitting = component.fitting()
@@ -225,10 +312,19 @@ class Ship():
             self.processor = processr
             self.components.append(component)
             self.componentNames.append(component.namer())
-            self.recompile(self.char)
-    def setMatrix(self,matrix):
-        self.affects = matrix
-        self.applySkills()
+            self.recompile(self.base)
+    def addAoe(self,ship):
+        self.aoeShips.append(ship)
+        self.updateShips.append(ship)
+    def addExtended(self,ship):
+        self.extendedShips.append(ship)
+        self.updateShips.append(ship)
+    def removeAoe(self,ship):
+        self.aoeShips.remove(ship)
+        self.updateShips.remove(ship)
+    def removeExtended(self,ship):
+        self.extendedShips.remove(ship)
+        self.updateShips.remove(ship)
     def dps(self):
         return sum([gun.dps() for gun in self.guns])
     def dpsResist(self,resist):
@@ -260,6 +356,7 @@ TestDeviceDB = {
         "activation": 17.3,
         "range":0,
         "cooldown": 24.0,
+        "effectType":0,
         "effect2":0,
         "effects2":0,
         "processor": 26.0,
@@ -453,7 +550,9 @@ class Character:
         step1 = self.combo({}, self.research, research_multipliers, research_effects, research_sequence)
         self.affects = self.combo(step1, self.skill,skill_multipliers,skill_effects,skill_sequence)
         for each in self.ships:
-            each.setMatrix(self.affects)
+            each.base = self.affects
+            each.recompile(self.affects)
+        return self.affects
     def allX(self,x):
         for one in self.research.keys():
             for two in self.research[one].keys():
@@ -493,14 +592,14 @@ class Gun():
         self.reset()
         for i in range(len(self.attributes)):
             j = (self.id*10) + i
-            value = self.compiler(j, i, matrix)
+            value = self.compiler(i, j, matrix)
             self.attributes[i] = self.attributes[i] * value
             if not self.id == 10:
                 j = 50 + i
-                value = self.compiler(j, i, matrix)
+                value = self.compiler(i, j, matrix)
                 self.attributes[i] = self.attributes[i] * value
             j = (round(self.id,-1) * 10) + i
-            value = self.compiler(j, i, matrix)
+            value = self.compiler(i, j, matrix)
             self.attributes[i] = self.attributes[i] * value
         self.cooldown = self.attributes[1]
         self.damage = self.attributes[2]
@@ -535,7 +634,7 @@ class Gun():
         return(self.name)
     def fitting(self):
         return([self.processor,self.power])
-    def compiler(self,j,i,matrix):
+    def compiler(self,i,j,matrix):
         value = 1
         if j in matrix.keys():
             if isinstance(matrix[j], list):
@@ -591,6 +690,7 @@ class Device():
         self.name = self.db['name']
         self.effects = self.db['effects']
         self.processor = self.db['processor']
+        self.effectType = self.db['effectType']
         self.effect2 = self.db['effect2']
         self.effects2 = self.db['effects2']
         self.power = self.db['power']
@@ -603,31 +703,66 @@ class Device():
         self.effectTime = self.db['effectTime']
         self.attributes = [0,self.effect,self.cooldown,self.activation,self.range]
     def matrixReturn(self):
-        returns = {}
-        if self.effects == 3:
-            returns[31] = self.effect
-            returns[32] = self.effect
-            returns[33] = self.effect
-        elif isinstance(self.effects, list):
-            for each in self.effects:
-                returns[each] = self.effect
+        if self.effectType == 0:
+            returns = {}
+            if self.effects == 3:
+                returns[31] = self.effect
+                returns[32] = self.effect
+                returns[33] = self.effect
+            elif isinstance(self.effects, list):
+                for each in self.effects:
+                    returns[each] = self.effect
+            else:
+                returns[self.effects] = self.effect
+            if isinstance(self.effects2, list):
+                for each in self.effects2:
+                    returns[each] = self.effect2
+            else:
+                returns[self.effects2] = self.effect2
+            return returns
         else:
-            returns[self.effects] = self.effect
-        if isinstance(self.effects2, list):
-            for each in self.effects2:
-                returns[each] = self.effect2
+            return {}
+    def aoeReturn(self):
+        if self.effectType == 2:
+            returns = {}
+            if isinstance(self.effects, list):
+                for each in self.effects:
+                    returns[each] = self.effect
+            else:
+                returns[self.effects] = self.effect
+            if isinstance(self.effects2, list):
+                for each in self.effects2:
+                    returns[each] = self.effect2
+            else:
+                returns[self.effects2] = self.effect2
+            return returns
         else:
-            returns[self.effects2] = self.effect2
-        return returns
-    def compiler(self,j,i,matrix):
+            return {}
+    def extendedReturn(self):
+        if self.effectType == 1:
+            returns = {}
+            if isinstance(self.effects, list):
+                for each in self.effects:
+                    returns[each] = self.effect
+            else:
+                returns[self.effects] = self.effect
+            if isinstance(self.effects2, list):
+                for each in self.effects2:
+                    returns[each] = self.effect2
+            else:
+                returns[self.effects2] = self.effect2
+            return returns
+        else:
+            return {}
+    def compiler(self,i,j,matrix):
         value = 1
         if j in matrix.keys():
             if isinstance(matrix[j], list):
                 for each in matrix[j]:
                     if i == 2 or i == 3:
-                        value = value * (1 - each / 100)
+                        value = value * (1 - (each / 100))
                     else:
-                        value = value * (1 + each / 100)
+                        value = value * (1 + (each / 100))
             else:
                 if i == 2 or i == 3:
                     value = 1 - matrix[j] / 100
@@ -676,7 +811,7 @@ class Component():
     def namer(self):
         return(self.name)
 
-loader("DB/1.0/")
+loader()
 char = Character()
 rifter = Ship(TestShipDB['Covert'],char)
 print(rifter.resistances)

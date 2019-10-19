@@ -8,8 +8,12 @@ def writer(target,tbw):
 
 def intextract(string):
     flat = [item for sublist in string for item in sublist]
-    base =''.join(x for x in flat if x.isdigit())
-    return(int(base))
+    base =[x for x in flat if x.isdigit() or x == "."]
+    while base[-1] == ".":
+        base.pop()
+    while base[0] == ".":
+        base.pop(0)
+    return(float(''.join(base)))
 
 form = {
     'appId': 1,
@@ -57,13 +61,13 @@ def parse(data):
             gun['cooldown'] = intextract(each.text)
         if 'Range' in each.text:
             try:
-                gun['range'] = intextract(each.text)/10
+                gun['range'] = intextract(each.text)
             except:
                 gun['range'] = 0
         if 'Crit Rate' in each.text:
-            gun['critChance'] = intextract(each.text)/10
+            gun['critChance'] = intextract(each.text)
         if 'Precision' in each.text:
-            gun['precision'] = intextract(each.text)/10
+            gun['precision'] = intextract(each.text)
         if 'Tracking Speed' in each.text:
             gun['tracking'] = intextract(each.text)
         if 'Activation Cost' in each.text:
