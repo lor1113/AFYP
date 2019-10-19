@@ -31,6 +31,7 @@ def parse(data):
             'precision' : 0,
             "tracking" : 0,
             "critChance": 0,
+            "id": 10,
             "critDmg": 0,
             "activation" : 0,
             "ammo" : 0,
@@ -107,11 +108,12 @@ def parse(data):
             ship['artillery']['damages'] = [ship['artillery']['damage']/3,ship['artillery']['damage']/3,ship['artillery']['damage']/3]
             ship['artillery']['range'] = listN.pop()
             ship['artillery']['name'] = names[ship['type']] + " Std Artillery"
-    print(ship)
     ships[name] = ship
+    print(ship)
 
 for each in links:
     datab = session.get(each, headers=header)
     parse(datab)
 
+print(len(ships))
 writer('Ships.json',ships)

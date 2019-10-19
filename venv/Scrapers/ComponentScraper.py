@@ -347,11 +347,11 @@ def parse(data):
             component['effects2'] = 0
         if 'Warp Core Stabilizer' in name:
             component['id'] = 1860
-            component['effects'] = 6
+            component['effects'] = 26
             component['effects2'] = 0
         if 'Warp Core Cover' in name:
             component['id'] = 1870
-            component['effects'] = 6
+            component['effects'] = 26
             component['effects2'] = 53
         if 'Warp Accelerator' in name:
             component['id'] = 1880

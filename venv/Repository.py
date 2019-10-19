@@ -108,6 +108,12 @@ class Ship():
                     self.attributes[9] = self.attributes[9] + each
             else:
                 self.attributes[9] = self.attributes[9] + self.affects[29]
+        if 26 in self.affects:
+            if isinstance(self.affects[26],list):
+                for each in self.affects[26]:
+                    self.attributes[6] = self.attributes[6] + each
+            else:
+                self.attributes[6] = self.attributes[6] + self.affects[26]
         self.armor = self.attributes[1]
         self.shield = self.attributes[2]
         self.resistances = self.attributes[3]
@@ -442,17 +448,23 @@ class Character:
     def applySkills(self):
         step1 = self.combo({}, self.research, research_multipliers, research_effects, research_sequence)
         self.affects = self.combo(step1, self.skill,skill_multipliers,skill_effects,skill_sequence)
-    def allV(self):
+    def allX(self,x):
         for one in self.research.keys():
             for two in self.research[one].keys():
                 for i in range(len(self.research[one][two])):
                     for j in range(len(self.research[one][two][i])):
-                        self.research[one][two][i][j] = 5
+                        self.research[one][two][i][j] = x
         for one in self.skill.keys():
             for two in self.skill[one].keys():
                 for i in range(len(self.skill[one][two])):
                     for j in range(len(self.skill[one][two][i])):
-                        self.skill[one][two][i][j] = 5
+                        self.skill[one][two][i][j] = x
+    def setSkills(self,skills):
+        self.skill = skills
+    def setResearches(self,researches):
+        self.research = researches
+    def setLicenses(self,licenses):
+        self.license = licenses
     def skills(self):
         return self.skill
     def researches(self):
@@ -659,7 +671,7 @@ char = Character()
 char.applySkills()
 rifter = Ship(TestShipDB['Covert'],char)
 print(rifter.resistances)
-char.allV()
+char.allX(5)
 char.applySkills()
 rifter.update(char)
 print(rifter.resistances)
