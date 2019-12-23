@@ -1,14 +1,16 @@
-import math
-import json
 import copy
+import json
+import math
 from pathlib import Path
 
 options = ["DB/1.0/"]
 default = "DB/1.0/"
 
+
 def reader(target):
     json_data = open(target).read()
     return json.loads(json_data)
+
 
 def find(code, dict):
     keys = code.split('.')
@@ -20,7 +22,8 @@ def find(code, dict):
             rv = rv[int(key)]
     return rv
 
-def loader(path = ""):
+
+def loader(path=""):
     global research_sequence
     global skill_sequence
     global research_multipliers
@@ -49,7 +52,7 @@ def loader(path = ""):
 
 
 class Ship():
-    def __init__(self,db,char):
+    def __init__(self, db, char):
         self.db = db
         self.char = char
         self.affects = char.affects
@@ -66,30 +69,34 @@ class Ship():
         self.updateShips = []
         self.guns = []
         self.applySkills()
-        self.addGun(self.db['artillery'],self.affects)
+        self.addGun(self.db['artillery'], self.affects)
         char.ships.append(self)
+
     def reset(self):
         self.type = self.db['type']
         self.race = self.db['race']
         self.tech = self.db['tech']
         self.armor = self.db['armor']
-        self.shield =  self.db['shield']
-        self.processor =  self.db['processor']
-        self.power =  self.db['power']
+        self.shield = self.db['shield']
+        self.processor = self.db['processor']
+        self.power = self.db['power']
         self.comCap = self.db['comCap']
-        self.resistances =  copy.copy(self.db['resistances'])
-        self.warpStab =  self.db['warpStab']
-        self.warpSpeed =  self.db['warpSpeed']
-        self.speed =  self.db['speed']
+        self.resistances = copy.copy(self.db['resistances'])
+        self.warpStab = self.db['warpStab']
+        self.warpSpeed = self.db['warpSpeed']
+        self.speed = self.db['speed']
         self.energy = self.db['energy']
-        self.recovery =  self.db['energyRecovery']
-        self.agility =  self.db['agility']
-        self.volume =  self.db['volume']
-        self.shieldRecovery =  self.db['shieldRecovery']
+        self.recovery = self.db['energyRecovery']
+        self.agility = self.db['agility']
+        self.volume = self.db['volume']
+        self.shieldRecovery = self.db['shieldRecovery']
         self.cargo = self.db['cargo']
         self.artillery = self.db['artillery']
         self.devCap = 2
-        self.attributes = [0,self.armor,self.shield,self.resistances,self.processor,self.power,self.warpStab,self.warpSpeed,self.speed,self.energy,self.recovery,self.agility,self.volume,self.shieldRecovery,self.cargo]
+        self.attributes = [0, self.armor, self.shield, self.resistances, self.processor, self.power, self.warpStab,
+                           self.warpSpeed, self.speed, self.energy, self.recovery, self.agility, self.volume,
+                           self.shieldRecovery, self.cargo]
+
     def applySkills(self):
         self.reset()
         if self.char.licenses()[self.race][self.tech][self.type] == 0:
@@ -100,29 +107,29 @@ class Ship():
                 self.comCap = self.comCap + 1
         for i in range(len(self.attributes)):
             if i in self.affects.keys():
-                value = self.compiler(i,i,self.affects)
+                value = self.compiler(i, i, self.affects)
                 self.attributes[i] = self.attributes[i] * value
-        for i in range(31,34):
+        for i in range(31, 34):
             if i in self.affects.keys():
-                if isinstance(self.affects[i],list):
+                if isinstance(self.affects[i], list):
                     for each in self.affects[i]:
-                        self.attributes[3][i-31] = 1 - ((1-self.attributes[3][i-31]) * (1-(each/100)))
+                        self.attributes[3][i - 31] = 1 - ((1 - self.attributes[3][i - 31]) * (1 - (each / 100)))
                 else:
-                    self.attributes[3][i-31] = 1 - ((1-self.attributes[3][i-31]) * (1-(self.affects[i]/100)))
+                    self.attributes[3][i - 31] = 1 - ((1 - self.attributes[3][i - 31]) * (1 - (self.affects[i] / 100)))
         if 22 in self.affects:
-            if isinstance(self.affects[22],list):
+            if isinstance(self.affects[22], list):
                 for each in self.affects[22]:
                     self.attributes[2] = self.attributes[2] + each
             else:
                 self.attributes[2] = self.attributes[2] + self.affects[22]
         if 29 in self.affects:
-            if isinstance(self.affects[29],list):
+            if isinstance(self.affects[29], list):
                 for each in self.affects[29]:
                     self.attributes[9] = self.attributes[9] + each
             else:
                 self.attributes[9] = self.attributes[9] + self.affects[29]
         if 26 in self.affects:
-            if isinstance(self.affects[26],list):
+            if isinstance(self.affects[26], list):
                 for each in self.affects[26]:
                     self.attributes[6] = self.attributes[6] + each
             else:
@@ -141,40 +148,43 @@ class Ship():
         self.volume = self.attributes[12]
         self.shieldRecovery = self.attributes[13]
         self.cargo = self.attributes[14]
+
     def compileExtended(self):
         self.extendedAffects = {}
         for each in self.devices:
             rtrn = each.extendedReturn()
             for each in rtrn.keys():
                 if each in self.extendedAffects:
-                    if isinstance(self.extendedAffects[each],list):
+                    if isinstance(self.extendedAffects[each], list):
                         self.extendedAffects[each].append(rtrn[each])
                     else:
-                        self.extendedAffects[each] = [self.extendedAffects[each],rtrn[each]]
+                        self.extendedAffects[each] = [self.extendedAffects[each], rtrn[each]]
                 else:
                     self.extendedAffects[each] = rtrn[each]
         return self.extendedAffects
+
     def compileAoe(self):
         self.aoeAffects = {}
         for each in self.devices:
             rtrn = each.aoeReturn()
             for each in rtrn.keys():
                 if each in self.aoeAffects:
-                    if isinstance(self.aoeAffects[each],list):
+                    if isinstance(self.aoeAffects[each], list):
                         self.aoeAffects[each].append(rtrn[each])
                     else:
-                        self.aoeAffects[each] = [self.aoeAffects[each],rtrn[each]]
+                        self.aoeAffects[each] = [self.aoeAffects[each], rtrn[each]]
                 else:
                     self.aoeAffects[each] = rtrn[each]
         return self.aoeAffects
-    def recompile(self,matrix):
+
+    def recompile(self, matrix):
         self.affects = matrix
         for each in self.aoeShips:
             each.recompile(each.base)
             toAppend = each.aoeAffects
             for each in toAppend.keys():
                 if each in self.affects:
-                    if isinstance(self.affects[each],list):
+                    if isinstance(self.affects[each], list):
                         self.affects[each].append(toAppend[each])
                     else:
                         self.affects[each] = [self.affects[each]]
@@ -186,7 +196,7 @@ class Ship():
             toAppend = each.extendedAffects
             for each in toAppend.keys():
                 if each in self.affects:
-                    if isinstance(self.affects[each],list):
+                    if isinstance(self.affects[each], list):
                         self.affects[each].append(toAppend[each])
                     else:
                         self.affects[each] = [self.affects[each]]
@@ -197,7 +207,7 @@ class Ship():
             toAppend = each.matrixReturn()
             for each in toAppend.keys():
                 if each in self.affects:
-                    if isinstance(self.affects[each],list):
+                    if isinstance(self.affects[each], list):
                         self.affects[each].append(toAppend[each])
                     else:
                         self.affects[each] = [self.affects[each]]
@@ -209,7 +219,7 @@ class Ship():
             toAppend = each.matrixReturn()
             for each in toAppend.keys():
                 if each in self.affects:
-                    if isinstance(self.affects[each],list):
+                    if isinstance(self.affects[each], list):
                         self.affects[each].append(toAppend[each])
                     else:
                         self.affects[each] = [self.affects[each]]
@@ -224,7 +234,8 @@ class Ship():
         self.affects[0] = 0
         for each in self.updateShips:
             each.recompile(each.base)
-    def compiler(self,i,j,matrix):
+
+    def compiler(self, i, j, matrix):
         value = 1
         if j in matrix.keys():
             if isinstance(matrix[j], list):
@@ -239,99 +250,108 @@ class Ship():
                 else:
                     value = 1 + matrix[j] / 100
         return value
-    def getAttr(self,id):
+
+    def getAttr(self, id):
         return self.attributes[id]
-    def removeGun(self,gun):
+
+    def removeGun(self, gun):
         fitting = gun.fitting()
         processr = self.processor + fitting[0]
         powr = self.power + fitting[1]
         self.guns.remove(gun)
         self.gunNames.remove(gun.namer())
         self.recompile(self.base)
-    def removeDevice(self,device):
+
+    def removeDevice(self, device):
         fitting = device.fitting()
         processr = self.processor + fitting[0]
         powr = self.power + fitting[1]
         self.devices.remove(device)
         self.deviceNames.remove(device.namer())
         self.recompile(self.base)
-    def removeComponent(self,component):
+
+    def removeComponent(self, component):
         fitting = component.fitting()
         processr = self.processor + fitting[0]
         powr = self.power + fitting[1]
         self.components.remove(component)
         self.componentNames.remove(component.namer())
         self.recompile(self.base)
-    def addGun(self,gundb,affects):
-        gun = Gun(gundb,affects)
+
+    def addGun(self, gundb, affects):
+        gun = Gun(gundb, affects)
         fitting = gun.fitting()
         processr = self.processor - fitting[0]
         powr = self.power - fitting[1]
         if powr < 0:
             print('Not enough Power')
-            return null
         if processr < 0:
             print('Not enough Processor')
-            return null
         if (len(self.guns) < 4):
             self.power = powr
             self.processor = processr
             self.guns.append(gun)
             self.gunNames.append(gun.namer())
             self.recompile(self.base)
-    def addDevice(self,devdb):
-        device = Device(devdb,self.affects)
+
+    def addDevice(self, devdb):
+        device = Device(devdb, self.affects)
         fitting = device.fitting()
         processr = self.processor - fitting[0]
         powr = self.power - fitting[1]
         if powr < 0:
             print('Not enough Power')
-            return null
         if processr < 0:
             print('Not enough Processor')
-            return null
         if (len(self.devices) < self.devCap):
             self.power = powr
             self.processor = processr
             self.devices.append(device)
             self.deviceNames.append(device.namer())
             self.recompile(self.base)
-    def addComponent(self,compdb):
-        component = Component(compdb,self.affects)
+
+    def addComponent(self, compdb):
+        component = Component(compdb, self.affects)
         fitting = component.fitting()
         processr = self.processor - fitting[0]
         powr = self.power - fitting[1]
         if powr < 0:
             print('Not enough Power')
-            return null
         if processr < 0:
             print('Not enough Processor')
-            return null
         if (len(self.components) < self.comCap):
             self.power = powr
             self.processor = processr
             self.components.append(component)
             self.componentNames.append(component.namer())
             self.recompile(self.base)
-    def addAoe(self,ship):
+
+    def addAoe(self, ship):
         self.aoeShips.append(ship)
         self.updateShips.append(ship)
-    def addExtended(self,ship):
+
+    def addExtended(self, ship):
         self.extendedShips.append(ship)
         self.updateShips.append(ship)
-    def removeAoe(self,ship):
+
+    def removeAoe(self, ship):
         self.aoeShips.remove(ship)
         self.updateShips.remove(ship)
-    def removeExtended(self,ship):
+
+    def removeExtended(self, ship):
         self.extendedShips.remove(ship)
         self.updateShips.remove(ship)
+
     def dps(self):
         return sum([gun.dps() for gun in self.guns])
-    def dpsResist(self,resist):
-        return(sum([gun.dpsResist(resist) for gun in self.guns]))
+
+    def dpsResist(self, resist):
+        return (sum([gun.dpsResist(resist) for gun in self.guns]))
+
     def ammoTime(self):
         times = [gun.ammoTime() for gun in self.guns]
         return min(times)
+
 
 TestComponentDB = {
     "Artillery Damage Amplifier III 2": {
@@ -354,11 +374,11 @@ TestDeviceDB = {
         "id": 140, "tech": 1.0,
         "rank": 1.0,
         "activation": 17.3,
-        "range":0,
+        "range": 0,
         "cooldown": 24.0,
-        "effectType":0,
-        "effect2":0,
-        "effects2":0,
+        "effectType": 0,
+        "effect2": 0,
+        "effects2": 0,
         "processor": 26.0,
         "power": 11.0,
         "effect": 28.0,
@@ -369,50 +389,50 @@ TestDeviceDB = {
 
 TestShipDB = {
     "Covert": {
-        "type" : 0,
-        'tech' : 0,
-        "race" : "OE",
-        "armor" : 1760,
-        "shield" : 1876,
-        "processor" : 243,
-        "power" : 107,
-        "comCap" : 1,
-        "resistances" : [0.3,0.1,0.5], #EM,KINETIC,THERMAL
-        "warpStab" : 2,
-        "warpSpeed" : 10.58,
-        "speed" : 688,
-        "energy" : 1241,
-        "cargo" : 100,
-        "energyRecovery" : 12,
-        "agility" : 693,
-        "volume" : 140,
+        "type": 0,
+        'tech': 0,
+        "race": "OE",
+        "armor": 1760,
+        "shield": 1876,
+        "processor": 243,
+        "power": 107,
+        "comCap": 1,
+        "resistances": [0.3, 0.1, 0.5],  # EM,KINETIC,THERMAL
+        "warpStab": 2,
+        "warpSpeed": 10.58,
+        "speed": 688,
+        "energy": 1241,
+        "cargo": 100,
+        "energyRecovery": 12,
+        "agility": 693,
+        "volume": 140,
         "shieldRecovery": 1,
-        "artillery" : {
-            "tech" : 0,
-            "rank" : 0,
-            "damage" : 18,
-            "damages" : [6,6,6],
-            "cooldown" : 1,
-            "range" : 9,
-            "id":10,
-            'precision' : 0,
-            "tracking" : 0,
-            "critChance" : 0,
-            "critDmg" : 0,
-            "activation" : 0,
-            "ammo" : 0,
-            "ammoUsage" : 1,
-            "processor" : 0,
-            "power" : 0,
-            "type" : 0,
-            "name" : "Frigate Std Artillery"
+        "artillery": {
+            "tech": 0,
+            "rank": 0,
+            "damage": 18,
+            "damages": [6, 6, 6],
+            "cooldown": 1,
+            "range": 9,
+            "id": 10,
+            'precision': 0,
+            "tracking": 0,
+            "critChance": 0,
+            "critDmg": 0,
+            "activation": 0,
+            "ammo": 0,
+            "ammoUsage": 1,
+            "processor": 0,
+            "power": 0,
+            "type": 0,
+            "name": "Frigate Std Artillery"
         }
     }
 }
 TestGunDB = {
     "artillery": {
         "damage": 18,
-        "damages": [6,6,6,],
+        "damages": [6, 6, 6, ],
         "cooldown": 1,
         "range": 9,
         'precision': 0,
@@ -420,7 +440,7 @@ TestGunDB = {
         "rank": 0,
         "tracking": 0,
         "critChance": 0,
-        "id":100,
+        "id": 100,
         "critDmg": 0,
         "activation": 0,
         "ammo": 0,
@@ -432,12 +452,12 @@ TestGunDB = {
     },
     "S-Combat Railgun I 1": {
         "damage": 124,
-        "damages": [31,93,0],
+        "damages": [31, 93, 0],
         "cooldown": 4,
         "range": 12.5,
         "critChance": 10.0,
         "id": 91,
-        "critDmg" : 2,
+        "critDmg": 2,
         "precision": 71.4,
         "tracking": 700,
         "activation": 41,
@@ -452,18 +472,44 @@ TestGunDB = {
     }
 }
 
+
+def combo(source, input, multipliers, effects, sequence):
+    for one in input.keys():
+        for two in input[one].keys():
+            for i in range(len(input[one][two])):
+                for j in range(len(input[one][two][i])):
+                    key = ".".join([one, two, str(i), str(j)])
+                    val = find(key, multipliers) * sequence[input[one][two][i][j]]
+                    if val != 0:
+                        entry = find(key, effects)
+                        if isinstance(entry, list):
+                            for each in entry:
+                                if each in source:
+                                    source[each].append(val)
+                                else:
+                                    source[each] = [val]
+                        else:
+                            if entry in source:
+                                source[entry].append(val)
+                            else:
+                                source[entry] = [val]
+    if 0 in source:
+        source[0] = 0
+    return source
+
+
 class Character:
     def __init__(self):
         self.ships = []
         self.research = {
             "Ships": {
-                "OE" : [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-                "NEF" : [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-                "ECD" : [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-                "RS" :[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+                "OE": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+                "NEF": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+                "ECD": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+                "RS": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
             },
-            "Weapons":{
-                'Blasters' : [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            "Weapons": {
+                'Blasters': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'BlastersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Lasers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'LasersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
@@ -474,8 +520,8 @@ class Character:
                 'General': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Artillery': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
             },
-            'Engineering':{
-                'Ship Core' : [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+            'Engineering': {
+                'Ship Core': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Energy Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Energy Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Shield Basics': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
@@ -504,13 +550,13 @@ class Character:
             "RS": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         }
         self.skill = {
-            "Weapon":{
-                "Railgun":[[0,0,0],[0,0,0],[0,0,0]],
-                "Launcher":[[0,0,0],[0,0,0],[0,0,0]],
-                "Laser":[[0,0,0],[0,0,0],[0,0,0]],
-                "Blaster":[[0,0,0],[0,0,0],[0,0,0]]
-                },
-            "Defense":{
+            "Weapon": {
+                "Railgun": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                "Launcher": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                "Laser": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                "Blaster": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+            },
+            "Defense": {
                 "Resistance": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 "Recharge": [[0, 0], [0, 0], [0, 0]]
             },
@@ -518,42 +564,21 @@ class Character:
                 "Energy": [[0, 0], [0, 0], [0, 0]],
                 "Recharge": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
             },
-            "Ship Piloting":{
+            "Ship Piloting": {
                 "Propulsion": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
             }
         }
         self.affects = {}
-    def combo(self,source,input,multipliers,effects,sequence):
-        for one in input.keys():
-            for two in input[one].keys():
-                for i in range(len(input[one][two])):
-                    for j in range(len(input[one][two][i])):
-                        key = ".".join([one,two,str(i),str(j)])
-                        val = find(key,multipliers) * sequence[input[one][two][i][j]]
-                        if val != 0:
-                            entry = find(key,effects)
-                            if isinstance(entry,list):
-                                for each in entry:
-                                    if each in source:
-                                        source[each].append(val)
-                                    else:
-                                        source[each] = [val]
-                            else:
-                                if entry in source:
-                                    source[entry].append(val)
-                                else:
-                                    source[entry] = [val]
-        if 0 in source:
-            source[0] = 0
-        return source
+
     def applySkills(self):
-        step1 = self.combo({}, self.research, research_multipliers, research_effects, research_sequence)
-        self.affects = self.combo(step1, self.skill,skill_multipliers,skill_effects,skill_sequence)
+        step1 = combo({}, self.research, research_multipliers, research_effects, research_sequence)
+        self.affects = combo(step1, self.skill, skill_multipliers, skill_effects, skill_sequence)
         for each in self.ships:
             each.base = self.affects
             each.recompile(self.affects)
         return self.affects
-    def allX(self,x):
+
+    def allX(self, x):
         for one in self.research.keys():
             for two in self.research[one].keys():
                 for i in range(len(self.research[one][two])):
@@ -565,40 +590,49 @@ class Character:
                     for j in range(len(self.skill[one][two][i])):
                         self.skill[one][two][i][j] = x
         self.applySkills()
-    def setSkills(self,skills):
+
+    def setSkills(self, skills):
         self.skill = skills
         self.applySkills()
-    def setResearches(self,researches):
+
+    def setResearches(self, researches):
         self.research = researches
         self.applySkills()
-    def setLicenses(self,licenses):
+
+    def setLicenses(self, licenses):
         self.license = licenses
         self.applySkills()
+
     def skills(self):
         return self.skill
+
     def researches(self):
         return self.research
+
     def licenses(self):
         return self.license
 
+
 clean = Character()
 
+
 class Gun():
-    def __init__(self,db,matrix):
+    def __init__(self, db, matrix):
         self.db = db
         self.affects = matrix
         self.applySkills(self.affects)
-    def applySkills(self,matrix):
+
+    def applySkills(self, matrix):
         self.reset()
         for i in range(len(self.attributes)):
-            j = (self.id*10) + i
+            j = (self.id * 10) + i
             value = self.compiler(i, j, matrix)
             self.attributes[i] = self.attributes[i] * value
             if not self.id == 10:
                 j = 50 + i
                 value = self.compiler(i, j, matrix)
                 self.attributes[i] = self.attributes[i] * value
-            j = (round(self.id,-1) * 10) + i
+            j = (round(self.id, -1) * 10) + i
             value = self.compiler(i, j, matrix)
             self.attributes[i] = self.attributes[i] * value
         self.cooldown = self.attributes[1]
@@ -609,32 +643,37 @@ class Gun():
         self.critChance = self.attributes[6]
         self.activation = self.attributes[7]
         for i in range(len(self.damages)):
-            self.damages[i] = self.damages[i] * (self.damage/self.db['damage'])
+            self.damages[i] = self.damages[i] * (self.damage / self.db['damage'])
+
     def reset(self):
-        self.damage =  self.db['damage']
+        self.damage = self.db['damage']
         self.damages = self.db['damages']
-        self.cooldown =  self.db['cooldown']
-        self.range =  self.db['range']
+        self.cooldown = self.db['cooldown']
+        self.range = self.db['range']
         self.id = self.db['id']
-        self.precision =  self.db['precision']
-        self.tracking =  self.db['tracking']
-        self.activation =  self.db['activation']
-        self.ammo =  self.db['ammo']
+        self.precision = self.db['precision']
+        self.tracking = self.db['tracking']
+        self.activation = self.db['activation']
+        self.ammo = self.db['ammo']
         self.tech = self.db['tech']
         self.rank = self.db['rank']
-        self.ammoUsage =  self.db['ammoUsage']
-        self.processor =  self.db['processor']
-        self.power =  self.db['power']
-        self.type =  self.db['type']
-        self.critChance = self.db['critChance']/10
+        self.ammoUsage = self.db['ammoUsage']
+        self.processor = self.db['processor']
+        self.power = self.db['power']
+        self.type = self.db['type']
+        self.critChance = self.db['critChance'] / 10
         self.critDmg = self.db['critDmg']
         self.name = self.db['name']
-        self.attributes = [0,self.cooldown,self.damage,self.range, self.tracking,self.critDmg,self.critChance,self.activation]
+        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance,
+                           self.activation]
+
     def namer(self):
-        return(self.name)
+        return (self.name)
+
     def fitting(self):
-        return([self.processor,self.power])
-    def compiler(self,i,j,matrix):
+        return ([self.processor, self.power])
+
+    def compiler(self, i, j, matrix):
         value = 1
         if j in matrix.keys():
             if isinstance(matrix[j], list):
@@ -649,42 +688,55 @@ class Gun():
                 else:
                     value = 1 + matrix[j] / 100
         return value
+
     def dps(self):
         if self.damages:
-            return(((sum(self.damages)/self.cooldown)*(1-self.critChance)) + ((sum(self.damages)/self.cooldown)*(self.critChance*self.critDmg)))
+            return (((sum(self.damages) / self.cooldown) * (1 - self.critChance)) + (
+                        (sum(self.damages) / self.cooldown) * (self.critChance * self.critDmg)))
         else:
-            return (((self.damage / self.cooldown) * (1 - self.critChance)) + ((self.damage / self.cooldown) * (self.critChance * self.critDmg)))
-    def dpsResist(self,resist):
+            return (((self.damage / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damage / self.cooldown) * (self.critChance * self.critDmg)))
+
+    def dpsResist(self, resist):
         if self.damages:
-            one = (((self.damages[0]/self.cooldown)*(1-self.critChance)) + ((self.damages[0]/self.cooldown)*(self.critChance*self.critDmg)))*(1-resist[0])
-            two = (((self.damages[1]/self.cooldown)*(1-self.critChance)) + ((self.damages[1]/self.cooldown)*(self.critChance*self.critDmg)))*(1-resist[1])
-            three = (((self.damages[2]/self.cooldown)*(1-self.critChance)) + ((self.damages[2]/self.cooldown)*(self.critChance*self.critDmg)))*(1-resist[2])
-            return(one+two+three)
+            one = (((self.damages[0] / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damages[0] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[0])
+            two = (((self.damages[1] / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damages[1] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[1])
+            three = (((self.damages[2] / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damages[2] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[2])
+            return (one + two + three)
         else:
-            return (((self.damage / self.cooldown) * (1 - self.critChance)) + ((self.damage / self.cooldown) * (self.critChance * self.critDmg)))
+            return (((self.damage / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damage / self.cooldown) * (self.critChance * self.critDmg)))
+
     def drain(self):
-        return(self.activation/self.cooldown)
+        return (self.activation / self.cooldown)
+
     def ammoTime(self):
         if self.ammo == 0:
             return math.inf
         else:
-            return((self.ammo/self.ammoUsage)*self.cooldown)
+            return ((self.ammo / self.ammoUsage) * self.cooldown)
+
 
 class Device():
-    def __init__(self,db,matrix):
+    def __init__(self, db, matrix):
         self.db = db
         self.affects = matrix
         self.applySkills(self.affects)
-    def applySkills(self,matrix):
+
+    def applySkills(self, matrix):
         self.reset()
         for i in range(len(self.attributes)):
             j = self.id * 10 + i
-            value = self.compiler(i,j,matrix)
+            value = self.compiler(i, j, matrix)
             self.attributes[i] = self.attributes[i] * value
         self.effect = self.attributes[1]
         self.cooldown = self.attributes[2]
         self.activation = self.attributes[3]
         self.range = self.attributes[4]
+
     def reset(self):
         self.id = self.db['id']
         self.name = self.db['name']
@@ -701,7 +753,8 @@ class Device():
         self.activation = self.db['activation']
         self.cooldown = self.db['cooldown']
         self.effectTime = self.db['effectTime']
-        self.attributes = [0,self.effect,self.cooldown,self.activation,self.range]
+        self.attributes = [0, self.effect, self.cooldown, self.activation, self.range]
+
     def matrixReturn(self):
         if self.effectType == 0:
             returns = {}
@@ -722,6 +775,7 @@ class Device():
             return returns
         else:
             return {}
+
     def aoeReturn(self):
         if self.effectType == 2:
             returns = {}
@@ -738,6 +792,7 @@ class Device():
             return returns
         else:
             return {}
+
     def extendedReturn(self):
         if self.effectType == 1:
             returns = {}
@@ -754,7 +809,8 @@ class Device():
             return returns
         else:
             return {}
-    def compiler(self,i,j,matrix):
+
+    def compiler(self, i, j, matrix):
         value = 1
         if j in matrix.keys():
             if isinstance(matrix[j], list):
@@ -769,19 +825,25 @@ class Device():
                 else:
                     value = 1 + matrix[j] / 100
         return value
+
     def drain(self):
-        return(self.activation/self.cooldown)
+        return (self.activation / self.cooldown)
+
     def namer(self):
-        return(self.name)
+        return (self.name)
+
     def fitting(self):
-        return([self.processor,self.power])
+        return ([self.processor, self.power])
+
 
 class Component():
-    def __init__(self,db,effects):
+    def __init__(self, db, effects):
         self.db = db
         self.applySkills()
+
     def applySkills(self):
         self.reset()
+
     def reset(self):
         self.processor = self.db['processor']
         self.power = self.db['power']
@@ -793,6 +855,7 @@ class Component():
         self.effect2 = self.db['effect2']
         self.effects = self.db['effects']
         self.effects2 = self.db['effects2']
+
     def matrixReturn(self):
         returns = {}
         if isinstance(self.effects, list):
@@ -806,14 +869,17 @@ class Component():
         else:
             returns[self.effects2] = self.effect2
         return returns
+
     def fitting(self):
-        return([self.processor,self.power])
+        return ([self.processor, self.power])
+
     def namer(self):
-        return(self.name)
+        return (self.name)
+
 
 loader()
 char = Character()
-rifter = Ship(TestShipDB['Covert'],char)
+rifter = Ship(TestShipDB['Covert'], char)
 print(rifter.resistances)
 char.allX(5)
 print(rifter.resistances)
