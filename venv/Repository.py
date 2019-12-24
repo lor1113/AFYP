@@ -50,7 +50,7 @@ def loader(path=""):
     skill_effects = data["skill_effects"]
 
 
-def compiler(i, j, matrix):
+def compiler(j, matrix):
     value = 1
     if j in matrix.keys():
         if isinstance(matrix[j], list):
@@ -61,7 +61,7 @@ def compiler(i, j, matrix):
     return value
 
 
-def invertedCompiler(i, j, matrix):
+def invertedCompiler(j, matrix):
     value = 1
     if j in matrix.keys():
         if isinstance(matrix[j], list):
@@ -169,11 +169,11 @@ class Ship:
         for i in range(len(self.attributes)):
             if i in self.inverted:
                 if i in self.affects.keys():
-                    value = invertedCompiler(i, i, self.affects)
+                    value = invertedCompiler(i, self.affects)
                     self.attributes[i] = self.attributes[i] * value
             else:
                 if i in self.affects.keys():
-                    value = compiler(i, i, self.affects)
+                    value = compiler(i, self.affects)
                     self.attributes[i] = self.attributes[i] * value
         for i in range(31, 34):
             if i in self.affects.keys():
@@ -643,19 +643,19 @@ class Gun:
         for i in range(len(self.attributes)):
             j = (self.id * 10) + i
             if i in self.inverted:
-                value = invertedCompiler(i, j, matrix)
+                value = invertedCompiler(j, matrix)
             else:
-                value = compiler(i,j,matrix)
+                value = compiler(j,matrix)
             self.attributes[i] = self.attributes[i] * value
             if not self.id == 10:
                 j = 50 + i
                 if i in self.inverted:
-                    value = invertedCompiler(i, j, matrix)
+                    value = invertedCompiler(j, matrix)
                 else:
-                    value = compiler(i, j, matrix)
+                    value = compiler(j, matrix)
                 self.attributes[i] = self.attributes[i] * value
             j = (round(self.id, -1) * 10) + i
-            value = compiler(i, j, matrix)
+            value = compiler(j, matrix)
             self.attributes[i] = self.attributes[i] * value
         self.cooldown = self.attributes[1]
         self.damage = self.attributes[2]
@@ -737,9 +737,9 @@ class Device:
         for i in range(len(self.attributes)):
             j = self.id * 10 + i
             if i in self.inverted:
-                value = invertedCompiler(i, j, matrix)
+                value = invertedCompiler(j, matrix)
             else:
-                value = compiler(i, j, matrix)
+                value = compiler(j, matrix)
             self.attributes[i] = self.attributes[i] * value
         self.effect = self.attributes[1]
         self.cooldown = self.attributes[2]
