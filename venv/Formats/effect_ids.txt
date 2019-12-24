@@ -12,7 +12,7 @@ Ship    000
     Speed   8
     Energy  9
     Energy Recovery 10
-    Agility 11  INVERTED
+    Agility 11
     Volume  12  INVERTED
     Shield Recovery 13
     Cargo   14
@@ -29,6 +29,7 @@ Tracking    4
 Crit Dmg    5
 Crit Rate   6
 Activation  7   INVERTED
+Precision 8
 
 Gun 50-100
     All 5
@@ -128,7 +129,8 @@ Device 100-1000
         Precision   970
         Signal  880
         Neut    890
-    Extended Interference   9
+
+    Extended Interference   900
         Screen (adaptive)   910
         Screen  92
             EM  921
