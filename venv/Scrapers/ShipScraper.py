@@ -1,45 +1,50 @@
-import requests
 from requests_html import HTMLSession
 import json
 import re
 
 ships = {}
 session = HTMLSession()
-header = {'user_agent':'skeet skeet yeet','Accept-Encoding':'gzip'}
-datab = session.get('https://us-news.zlongame.com/sgwarship/index.jhtml',headers = header)
+header = {'user_agent': 'skeet skeet yeet', 'Accept-Encoding': 'gzip'}
+datab = session.get('https://us-news.zlongame.com/sgwarship/index.jhtml', headers=header)
 links = datab.html.links
 links = [n for n in links if "shiptype" in n]
+
+
 def intextract(string):
     flat = [item for sublist in string for item in sublist]
-    base =''.join(x for x in flat if x.isdigit())
-    return(int(base))
+    base = ''.join(x for x in flat if x.isdigit())
+    return (int(base))
 
-names = ["Frigate","Destroyer","Cruiser","Battlecruiser","Battleship"]
-def writer(target,tbw):
-    with open(target,'w') as outfile:
-        json.dump(tbw,outfile)
+
+names = ["Frigate", "Destroyer", "Cruiser", "Battlecruiser", "Battleship"]
+
+
+def writer(target, tbw):
+    with open(target, 'w') as outfile:
+        json.dump(tbw, outfile)
+
 
 def parse(data):
     ship = {}
     name = ''
-    ship['resistances'] = [0,0,0]
+    ship['resistances'] = [0, 0, 0]
     ship['artillery'] = {
-            "damage" : 0,
-            "damages" : False,
-            "cooldown" : 1,
-            "range" : 0,
-            'precision' : 0,
-            "tracking" : 0,
-            "critChance": 0,
-            "id": 10,
-            "critDmg": 0,
-            "activation" : 0,
-            "ammo" : 0,
-            "ammoUsage" : 1,
-            "processor" : 0,
-            "power" : 0,
-            "type" : 0,
-        }
+        "damage": 0,
+        "damages": False,
+        "cooldown": 1,
+        "range": 0,
+        'precision': 0,
+        "tracking": 0,
+        "critChance": 0,
+        "id": 10,
+        "critDmg": 0,
+        "activation": 0,
+        "ammo": 0,
+        "ammoUsage": 1,
+        "processor": 0,
+        "power": 0,
+        "type": 0,
+    }
     yeet = data.html.find(".ship_desc.ship_desc_t > li")
     for each in yeet:
         if "Type" in each.text:
@@ -54,7 +59,7 @@ def parse(data):
             if "Battleship" in each.text:
                 ship['type'] = 4
         if "Class" in each.text:
-            name = each.text.replace("Class","").strip()
+            name = each.text.replace("Class", "").strip()
         if "Processor" in each.text:
             ship['processor'] = intextract(each.text.split())
         if "Power" in each.text:
@@ -105,15 +110,16 @@ def parse(data):
             listNums = map(int, re.findall('\d+', each.text))
             listN = list(listNums)
             ship['artillery']['damage'] = listN.pop()
-            ship['artillery']['damages'] = [ship['artillery']['damage']/3,ship['artillery']['damage']/3,ship['artillery']['damage']/3]
+            ship['artillery']['damages'] = [ship['artillery']['damage'] / 3, ship['artillery']['damage'] / 3,ship['artillery']['damage'] / 3]
             ship['artillery']['range'] = listN.pop()
             ship['artillery']['name'] = names[ship['type']] + " Std Artillery"
     ships[name] = ship
     print(ship)
+
 
 for each in links:
     datab = session.get(each, headers=header)
     parse(datab)
 
 print(len(ships))
-writer('Ships.json',ships)
+writer('Ships.json', ships)

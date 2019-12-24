@@ -109,6 +109,8 @@ class Ship:
         self.devices = []
         self.updateShips = []
         self.guns = []
+        self.hullBonuses = self.db['hullBonuses']
+        self.licenseBonuses = self.db['licenseBonuses']
         self.applySkills()
         self.addGun(self.db['artillery'], self.affects)
         char.ships.append(self)
@@ -134,18 +136,30 @@ class Ship:
         self.cargo = self.db['cargo']
         self.artillery = self.db['artillery']
         self.devCap = 2
+        self.license = self.char.licenses()[self.race][self.tech][self.type]
         self.attributes = [0, self.armor, self.shield, self.resistances, self.processor, self.power, self.warpStab,
                            self.warpSpeed, self.speed, self.energy, self.recovery, self.agility, self.volume,
                            self.shieldRecovery, self.cargo]
 
     def applySkills(self):
         self.reset()
-        if self.char.licenses()[self.race][self.tech][self.type] == 0:
-            pass
-        elif self.char.licenses()[self.race][self.tech][self.type] > 3:
+        if self.license == 0:
+            print("Lacks License")
+        elif self.license > 3:
             self.devCap = 3
-            if self.char.licenses()[self.race][self.tech][self.type] > 5:
+            if self.license > 5:
                 self.comCap = self.comCap + 1
+        for key,val in self.hullBonuses.items():
+            if key in self.affects.keys():
+                self.affects[key].append(val)
+            else:
+                self.affects[key] = [val]
+        for key,val in self.licenseBonuses.items():
+            val = val * self.license
+            if key in self.affects.keys():
+                self.affects[key].append(val)
+            else:
+                self.affects[key] = [val]
         for i in range(len(self.attributes)):
             if i in self.affects.keys():
                 value = compiler(i, i, self.affects)
@@ -423,6 +437,8 @@ TestShipDB = {
         "agility": 693,
         "volume": 140,
         "shieldRecovery": 1,
+        "hullBonuses": {"26":1,"15":15,"16":55},
+        "licenseBonuses": {"10":4.5,"12":2,"601":3},
         "artillery": {
             "tech": 0,
             "rank": 0,
@@ -501,13 +517,13 @@ class Character:
             },
             "Weapons": {
                 'Blasters': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                'BlastersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Blasters Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Lasers': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                'LasersAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Lasers Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Railguns': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                'RailgunsAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Railguns Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Missiles': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                'MissilesAdv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                'Missiles Adv': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'General': [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
                 'Artillery': [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
             },
@@ -652,8 +668,7 @@ class Gun:
         self.critChance = self.db['critChance'] / 10
         self.critDmg = self.db['critDmg']
         self.name = self.db['name']
-        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance,
-                           self.activation]
+        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance,self.activation]
 
     def naming(self):
         return self.name
@@ -663,11 +678,11 @@ class Gun:
 
     def dps(self):
         if self.damages:
-            return (((sum(self.damages) / self.cooldown) * (1 - self.critChance)) + (
-                    (sum(self.damages) / self.cooldown) * (self.critChance * self.critDmg)))
+            return ((sum(self.damages) / self.cooldown) * (1 - self.critChance)) + (
+                    (sum(self.damages) / self.cooldown) * (self.critChance * self.critDmg))
         else:
-            return (((self.damage / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damage / self.cooldown) * (self.critChance * self.critDmg)))
+            return ((self.damage / self.cooldown) * (1 - self.critChance)) + (
+                    (self.damage / self.cooldown) * (self.critChance * self.critDmg))
 
     def dpsResist(self, resist):
         if self.damages:
@@ -679,8 +694,8 @@ class Gun:
                     (self.damages[2] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[2])
             return one + two + three
         else:
-            return (((self.damage / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damage / self.cooldown) * (self.critChance * self.critDmg)))
+            return ((self.damage / self.cooldown) * (1 - self.critChance)) + (
+                    (self.damage / self.cooldown) * (self.critChance * self.critDmg))
 
     def drain(self):
         return self.activation / self.cooldown

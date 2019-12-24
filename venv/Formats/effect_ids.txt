@@ -17,6 +17,7 @@ Ship    000
     Shield Recovery 13
     Cargo   14
     Standard Thruster Power 15
+    Standard Thruster Activation 16
     Shield (Additive)   22
     Energy (Additive)   29
     Warp Stab (Additive)    26
