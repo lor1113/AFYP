@@ -55,15 +55,20 @@ def compiler(i, j, matrix):
     if j in matrix.keys():
         if isinstance(matrix[j], list):
             for each in matrix[j]:
-                if i == 12:
-                    value = value * (1 - each / 100)
-                else:
-                    value = value * (1 + each / 100)
+                value = value * (1 + each / 100)
         else:
-            if i == 12:
-                value = 1 - matrix[j] / 100
-            else:
-                value = 1 + matrix[j] / 100
+            value = 1 + matrix[j] / 100
+    return value
+
+
+def invertedCompiler(i, j, matrix):
+    value = 1
+    if j in matrix.keys():
+        if isinstance(matrix[j], list):
+            for each in matrix[j]:
+                value = value * (1 - each / 100)
+        else:
+            value = 1 - matrix[j] / 100
     return value
 
 
@@ -109,6 +114,7 @@ class Ship:
         self.devices = []
         self.updateShips = []
         self.guns = []
+        self.inverted = [11, 12]
         self.hullBonuses = self.db['hullBonuses']
         self.licenseBonuses = self.db['licenseBonuses']
         self.applySkills()
@@ -149,21 +155,26 @@ class Ship:
             self.devCap = 3
             if self.license > 5:
                 self.comCap = self.comCap + 1
-        for key,val in self.hullBonuses.items():
+        for key, val in self.hullBonuses.items():
             if key in self.affects.keys():
                 self.affects[key].append(val)
             else:
                 self.affects[key] = [val]
-        for key,val in self.licenseBonuses.items():
+        for key, val in self.licenseBonuses.items():
             val = val * self.license
             if key in self.affects.keys():
                 self.affects[key].append(val)
             else:
                 self.affects[key] = [val]
         for i in range(len(self.attributes)):
-            if i in self.affects.keys():
-                value = compiler(i, i, self.affects)
-                self.attributes[i] = self.attributes[i] * value
+            if i in self.inverted:
+                if i in self.affects.keys():
+                    value = invertedCompiler(i, i, self.affects)
+                    self.attributes[i] = self.attributes[i] * value
+            else:
+                if i in self.affects.keys():
+                    value = compiler(i, i, self.affects)
+                    self.attributes[i] = self.attributes[i] * value
         for i in range(31, 34):
             if i in self.affects.keys():
                 if isinstance(self.affects[i], list):
@@ -437,8 +448,8 @@ TestShipDB = {
         "agility": 693,
         "volume": 140,
         "shieldRecovery": 1,
-        "hullBonuses": {"26":1,"15":15,"16":55},
-        "licenseBonuses": {"10":4.5,"12":2,"601":3},
+        "hullBonuses": {"26": 1, "15": 15, "16": 55},
+        "licenseBonuses": {"10": 4.5, "12": 2, "601": 3},
         "artillery": {
             "tech": 0,
             "rank": 0,
@@ -624,17 +635,24 @@ class Gun:
     def __init__(self, db, matrix):
         self.db = db
         self.affects = matrix
+        self.inverted = [1,7]
         self.applySkills(self.affects)
 
     def applySkills(self, matrix):
         self.reset()
         for i in range(len(self.attributes)):
             j = (self.id * 10) + i
-            value = compiler(i, j, matrix)
+            if i in self.inverted:
+                value = invertedCompiler(i, j, matrix)
+            else:
+                value = compiler(i,j,matrix)
             self.attributes[i] = self.attributes[i] * value
             if not self.id == 10:
                 j = 50 + i
-                value = compiler(i, j, matrix)
+                if i in self.inverted:
+                    value = invertedCompiler(i, j, matrix)
+                else:
+                    value = compiler(i, j, matrix)
                 self.attributes[i] = self.attributes[i] * value
             j = (round(self.id, -1) * 10) + i
             value = compiler(i, j, matrix)
@@ -668,7 +686,7 @@ class Gun:
         self.critChance = self.db['critChance'] / 10
         self.critDmg = self.db['critDmg']
         self.name = self.db['name']
-        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance,self.activation]
+        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance, self.activation]
 
     def naming(self):
         return self.name
@@ -711,13 +729,17 @@ class Device:
     def __init__(self, db, matrix):
         self.db = db
         self.affects = matrix
+        self.inverted = [2,3]
         self.applySkills(self.affects)
 
     def applySkills(self, matrix):
         self.reset()
         for i in range(len(self.attributes)):
             j = self.id * 10 + i
-            value = compiler(i, j, matrix)
+            if i in self.inverted:
+                value = invertedCompiler(i, j, matrix)
+            else:
+                value = compiler(i, j, matrix)
             self.attributes[i] = self.attributes[i] * value
         self.effect = self.attributes[1]
         self.cooldown = self.attributes[2]
@@ -846,6 +868,11 @@ class Component:
 
     def naming(self):
         return self.name
+
+
+class Implant:
+    def __init__(self, name):
+        return
 
 
 loader()

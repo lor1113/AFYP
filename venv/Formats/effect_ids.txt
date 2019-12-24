@@ -12,8 +12,8 @@ Ship    000
     Speed   8
     Energy  9
     Energy Recovery 10
-    Agility 11
-    Volume  12
+    Agility 11  INVERTED
+    Volume  12  INVERTED
     Shield Recovery 13
     Cargo   14
     Standard Thruster Power 15
@@ -22,37 +22,37 @@ Ship    000
     Energy (Additive)   29
     Warp Stab (Additive)    26
 
-Cooldown    1
+Cooldown    1   INVERTED
 Damage  2
 Range   3
 Tracking    4
 Crit Dmg    5
 Crit Rate   6
-Activation  7
+Activation  7   INVERTED
 
 Gun 50-100
-    All 50
-    Lasers  60
+    All 5
+    Lasers  6
         S   61
         M   62
         L   63
-    Blasters    70
+    Blasters    7
         S   71
         M   72
         L   73
-    Missiles    80
+    Missiles    8
         S   81
         M   82
         L   83
-    Railguns    90
+    Railguns    9
         S   91
         M   92
         L   93
-    Artillery   100
+    Artillery   10
 
 Effect  1
-Cooldown    2
-Activation  3
+Cooldown    2   INVERTED
+Activation  3   INVERTED
 Range   4
 
 Device 100-1000
