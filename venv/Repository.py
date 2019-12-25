@@ -43,13 +43,13 @@ def loader(path=""):
     componentDB = reader(folder / 'Components.json')
     deviceDB = reader(folder / 'Devices.json')
     data = reader(folder / 'Data.json')
+    implantDB = reader(folder / "Implants.json")
     research_sequence = data['research_sequence']
     skill_sequence = data['skill_sequence']
     research_multipliers = data['research_multipliers']
     research_effects = data["research_effects"]
     skill_multipliers = data["skill_multipliers"]
     skill_effects = data["skill_effects"]
-    implantDB = data["ImplantDB"]
 
 
 def compiler(j, matrix):
@@ -879,7 +879,7 @@ class Implant:
         self.tech = 0
         self.rank = 0
         self.type = ""
-        self.effects = []
+        self.effects = {}
         self.subtype = 0
         self.oem = False
         self.decode()
@@ -908,7 +908,9 @@ class Implant:
         if self.oem:
             return
         else:
-            self.effects = implantDB["amAffects"][self.lobe][self.type][self.subtype - 1]
+            affects = implantDB["amAffects"][self.lobe][self.type][self.subtype - 1]
+            effect = implantDB["amMultipliers"][self.lobe][self.type][self.subtype - 1]
+            multi = implantDB["amSequence"][(self.rank + ((self.tech - 1)*5)) - 4]
 
 
 
@@ -921,3 +923,6 @@ print(rifter.devices[0].cooldown)
 charred.allX(5)
 print(rifter.devices[0].cooldown)
 print(rifter.resistances)
+strang = "Thunder PL-113 I"
+new = Implant(strang)
+print(new.effects)

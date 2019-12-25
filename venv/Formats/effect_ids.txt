@@ -21,6 +21,9 @@ Ship    000
     Shield (Additive)   22
     Energy (Additive)   29
     Warp Stab (Additive)    26
+    SD Recovery Base    31
+    SD Recovery Damage  32
+    SD Recovery Energy  33
 
 Cooldown    1   INVERTED
 Damage  2

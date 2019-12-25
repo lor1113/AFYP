@@ -31,13 +31,13 @@ def loader(path=""):
     componentDB = reader(folder / 'Components.json')
     deviceDB = reader(folder / 'Devices.json')
     data = reader(folder / 'Data.json')
+    implantDB = reader(folder / "Implants.json")
     research_sequence = data['research_sequence']
     skill_sequence = data['skill_sequence']
     research_multipliers = data['research_multipliers']
     research_effects = data["research_effects"]
     skill_multipliers = data["skill_multipliers"]
     skill_effects = data["skill_effects"]
-    implantDB = data["ImplantDB"]
 
 
 class Implant:
