@@ -99,6 +99,27 @@ def combo(source, info, multipliers, effects, sequence):
     return source
 
 
+def collate(dict1, dict2):
+    for key, item in dict2.items():
+        if isinstance(item, list):
+            if key in dict1.keys():
+                if isinstance(dict1[key], list):
+                    dict1[key] = dict1[key].extend(item)
+                else:
+                    dict1[key] = [dict1[key]].extend[item]
+            else:
+                dict1[key] = item
+        else:
+            if key in dict1.keys():
+                if isinstance(dict1[key], list):
+                    dict1[key].append(item)
+                else:
+                    dict1[key] = [dict1[key], item]
+            else:
+                dict1[key] = item
+    return dict1
+
+
 class Ship:
     def __init__(self, db, char):
         self.db = db
@@ -519,8 +540,18 @@ TestGunDB = {
 
 
 class Character:
-    def __init__(self):
+    def __init__(self, level=""):
         self.ships = []
+        self.implants = []
+        self.p = [0, 0]
+        self.t = [0, 0]
+        self.f = [0, 0]
+        self.o = [0, 0]
+        self.slots = [self.p, self.t, self.f, self.o]
+        if level:
+            self.setLevel(level)
+        else:
+            self.level = 0
         self.research = {
             "Ships": {
                 "OE": [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
@@ -592,7 +623,11 @@ class Character:
 
     def applySkills(self):
         step1 = combo({}, self.research, research_multipliers, research_effects, research_sequence)
-        self.affects = combo(step1, self.skill, skill_multipliers, skill_effects, skill_sequence)
+        step2 = combo(step1, self.skill, skill_multipliers, skill_effects, skill_sequence)
+        for each in self.implants:
+            step2 = collate(step2, each.output)
+        self.affects = step2
+        print(step2)
         for each in self.ships:
             each.base = self.affects
             each.recompile(self.affects)
@@ -632,12 +667,32 @@ class Character:
     def licenses(self):
         return self.license
 
+    def setLevel(self, level):
+        self.level = level
+        con = math.floor((min(level, 32)) / 4)
+        noc = implantDB["unlocks"][con]
+        self.p[0] = noc[0]
+        self.t[0] = noc[1]
+        self.f[0] = noc[2]
+        self.o[0] = noc[3]
+
+    def addShip(self, db):
+        return Ship(db, self)
+
+    def addImplant(self, name):
+        implant = Implant(name)
+        slot = self.slots[implantDB["lobes"].index(implant.lobe)]
+        if slot[0] > slot[1]:
+            self.implants.append(implant)
+            slot[0] = slot[0] + 1
+            self.applySkills()
+
 
 class Gun:
     def __init__(self, db, matrix):
         self.db = db
         self.affects = matrix
-        self.inverted = [1,7]
+        self.inverted = [1, 7]
         self.applySkills(self.affects)
 
     def applySkills(self, matrix):
@@ -647,7 +702,7 @@ class Gun:
             if i in self.inverted:
                 value = invertedCompiler(j, matrix)
             else:
-                value = compiler(j,matrix)
+                value = compiler(j, matrix)
             self.attributes[i] = self.attributes[i] * value
             if not self.id == 10:
                 j = 50 + i
@@ -688,7 +743,7 @@ class Gun:
         self.critChance = self.db['critChance'] / 10
         self.critDmg = self.db['critDmg']
         self.name = self.db['name']
-        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance, self.activation,self.precision]
+        self.attributes = [0, self.cooldown, self.damage, self.range, self.tracking, self.critDmg, self.critChance, self.activation, self.precision]
 
     def naming(self):
         return self.name
@@ -731,7 +786,7 @@ class Device:
     def __init__(self, db, matrix):
         self.db = db
         self.affects = matrix
-        self.inverted = [2,3]
+        self.inverted = [2, 3]
         self.applySkills(self.affects)
 
     def applySkills(self, matrix):
@@ -879,7 +934,7 @@ class Implant:
         self.tech = 0
         self.rank = 0
         self.type = ""
-        self.effects = {}
+        self.output = {}
         self.subtype = 0
         self.oem = False
         self.decode()
@@ -905,24 +960,86 @@ class Implant:
             self.subtype = int(x[-3])
         except:
             return
+        multi = implantDB["sequence"][(self.rank + ((self.tech - 1) * 5)) - 1]
         if self.oem:
-            return
+            primary = self.type[0]
+            secondary = self.type[1]
+            if primary in ["A", "R", "C", "F"]:
+                if secondary == "O":
+                    if self.subtype == 0:
+                        affects = implantDB["oemAffects"][primary][0] + 50
+                        effect = round(implantDB["oemMultipliers"][primary][0] * multi, 1)
+                        self.output = {
+                            affects: effect
+                        }
+                    else:
+                        effect = round(implantDB["oemMultipliers"][primary][0] * (1 / 3) * multi, 1)
+                        affects = implantDB["oemAffects"][primary][0]
+                        self.output = {
+                            affects + implantDB["oemCycle"][self.subtype][0]: effect,
+                            affects + implantDB["oemCycle"][self.subtype][1]: effect
+                        }
+                else:
+                    if self.subtype == 0:
+                        affects = [implantDB["oemAffects"][primary][0] + 50].extend(implantDB["oemAffects"][secondary])
+                        effect = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                        for each in affects:
+                            self.output[each] = effect
+                    else:
+                        effect = round(implantDB["oemMultipliers"][primary][0] * 0.75 * (1 / 3) * multi, 1)
+                        affects = implantDB["oemAffects"][primary][0]
+                        self.output = {
+                            affects + implantDB["oemCycle"][self.subtype][0]: effect,
+                            affects + implantDB["oemCycle"][self.subtype][1]: effect,
+                        }
+                        affects = implantDB["oemAffects"][secondary]
+                        for each in affects:
+                            self.output[each] = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
+            else:
+                if secondary == "O":
+                    affects = implantDB["oemAffects"][primary]
+                    effects = round(implantDB["oemMultipliers"][primary][0] * multi, 1)
+                    for each in affects:
+                        self.output[each] = effects
+                if secondary in ["A", "R", "C", "F"]:
+                    affects = implantDB["oemAffects"][primary]
+                    effects = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                    for each in affects:
+                        self.output[each] = effects
+                    effect = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
+                    affects = implantDB["oemAffects"][secondary][0]
+                    self.output[affects + implantDB["oemCycle"][self.subtype][0]] = effect
+                    self.output[affects + implantDB["oemCycle"][self.subtype][1]] = effect
+                else:
+                    affects = implantDB["oemAffects"][primary]
+                    effects = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                    for each in affects:
+                        self.output[each] = effects
+                    affects = implantDB["oemAffects"][secondary]
+                    effects = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
+                    for each in affects:
+                        self.output[each] = effects
         else:
             affects = implantDB["amAffects"][self.lobe][self.type][self.subtype - 1]
             effect = implantDB["amMultipliers"][self.lobe][self.type][self.subtype - 1]
-            multi = implantDB["amSequence"][(self.rank + ((self.tech - 1)*5)) - 4]
-
+            if isinstance(effect, list):
+                self.output = {
+                    affects[0]: round(effect[0] * multi, 1),
+                    affects[1]: round(effect[1] * multi, 1)
+                }
+            else:
+                if isinstance(affects, list):
+                    for each in affects:
+                        self.output[each] = round(effect * multi, 1)
+                else:
+                    self.output[affects] = round(effect * multi, 1)
 
 
 loader()
-charred = Character()
-rifter = Ship(TestShipDB['Covert'], charred)
-print(rifter.resistances)
-rifter.addDevice(TestDeviceDB['Adaptive Screen 1'])
-print(rifter.devices[0].cooldown)
-charred.allX(5)
-print(rifter.devices[0].cooldown)
-print(rifter.resistances)
-strang = "Thunder PL-113 I"
-new = Implant(strang)
-print(new.effects)
+steve = Character(level=32)
+rifter = Ship(TestShipDB["Covert"],steve)
+print(rifter.dps())
+strang = "Crowley AO-013 I"
+steve.addImplant(strang)
+print(steve.implants[0].output)
+print(rifter.dps())
