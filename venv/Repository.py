@@ -106,7 +106,7 @@ def collate(dict1, dict2):
                 if isinstance(dict1[key], list):
                     dict1[key] = dict1[key].extend(item)
                 else:
-                    dict1[key] = [dict1[key]].extend[item]
+                    dict1[key] = [dict1[key]].extend(item)
             else:
                 dict1[key] = item
         else:
@@ -540,7 +540,7 @@ TestGunDB = {
 
 
 class Character:
-    def __init__(self, level=""):
+    def __init__(self, level=None):
         self.ships = []
         self.implants = []
         self.p = [0, 0]
@@ -627,7 +627,6 @@ class Character:
         for each in self.implants:
             step2 = collate(step2, each.output)
         self.affects = step2
-        print(step2)
         for each in self.ships:
             each.base = self.affects
             each.recompile(self.affects)
@@ -679,13 +678,19 @@ class Character:
     def addShip(self, db):
         return Ship(db, self)
 
-    def addImplant(self, name):
-        implant = Implant(name)
+    def addImplant(self, name="",implant=""):
+        if not implant:
+            implant = Implant(name)
         slot = self.slots[implantDB["lobes"].index(implant.lobe)]
         if slot[0] > slot[1]:
             self.implants.append(implant)
             slot[0] = slot[0] + 1
             self.applySkills()
+
+    def removeImplant(self,implant):
+        self.implants.remove(implant)
+        slot = self.slots[implantDB["lobes"].index(implant.lobe)]
+        slot[0] = slot[0] - 1
 
 
 class Gun:
@@ -711,9 +716,9 @@ class Gun:
                 else:
                     value = compiler(j, matrix)
                 self.attributes[i] = self.attributes[i] * value
-            j = (round(self.id, -1) * 10) + i
-            value = compiler(j, matrix)
-            self.attributes[i] = self.attributes[i] * value
+                j = (round(self.id, -1) * 10) + i
+                value = compiler(j, matrix)
+                self.attributes[i] = self.attributes[i] * value
         self.cooldown = self.attributes[1]
         self.damage = self.attributes[2]
         self.range = self.attributes[3]
@@ -1038,8 +1043,9 @@ class Implant:
 loader()
 steve = Character(level=32)
 rifter = Ship(TestShipDB["Covert"],steve)
-print(rifter.dps())
-strang = "Crowley AO-013 I"
-steve.addImplant(strang)
-print(steve.implants[0].output)
-print(rifter.dps())
+print(rifter.guns[0].damage)
+strang = "Crowley AO-024 II"
+steve.addImplant(name=strang)
+print(rifter.guns[0].damage)
+steve.addImplant(name=strang)
+print(rifter.guns[0].damage)
