@@ -269,29 +269,53 @@ class Ship:
     def recompile(self, matrix):
         self.affects = matrix
         for each in self.aoeShips:
-            each.recompile(each.base)
-            toAppend = each.aoeAffects
+            each[0].recompile(each.base)
+            toAppend = each[0].aoeAffects
             for each2 in toAppend.keys():
-                if each2 in self.affects:
-                    if isinstance(self.affects[each2], list):
-                        self.affects[each2].append(toAppend[each2])
-                    else:
-                        self.affects[each2] = [self.affects[each2]]
-                        self.affects[each2].append(toAppend[each2])
+                if each[1]:
+                    if each2 > 8000:
+                        if each2 in self.affects:
+                            if isinstance(self.affects[each2], list):
+                                self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = [self.affects[each2]]
+                                self.affects[each2].append(toAppend[each2])
+                        else:
+                            self.affects[each2] = toAppend[each2]
                 else:
-                    self.affects[each2] = toAppend[each2]
+                    if each2 < 8000:
+                        if each2 in self.affects:
+                            if isinstance(self.affects[each2], list):
+                                self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = [self.affects[each2]]
+                                self.affects[each2].append(toAppend[each2])
+                        else:
+                            self.affects[each2] = toAppend[each2]
         for each in self.extendedShips:
-            each.recompile(each.base)
-            toAppend = each.extendedAffects
+            each[0].recompile(each.base)
+            toAppend = each[0].extendedAffects
             for each2 in toAppend.keys():
-                if each2 in self.affects:
-                    if isinstance(self.affects[each2], list):
-                        self.affects[each2].append(toAppend[each2])
-                    else:
-                        self.affects[each2] = [self.affects[each2]]
-                        self.affects[each2].append(toAppend[each2])
+                if each[1]:
+                    if each2 > 8000:
+                        if each2 in self.affects:
+                            if isinstance(self.affects[each2], list):
+                                self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = [self.affects[each2]]
+                                self.affects[each2].append(toAppend[each2])
+                        else:
+                            self.affects[each2] = toAppend[each2]
                 else:
-                    self.affects[each2] = toAppend[each2]
+                    if each2 < 8000:
+                        if each2 in self.affects:
+                            if isinstance(self.affects[each2], list):
+                                self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = [self.affects[each2]]
+                                self.affects[each2].append(toAppend[each2])
+                        else:
+                            self.affects[each2] = toAppend[each2]
         for each in self.components:
             toAppend = each.matrixReturn()
             for each2 in toAppend.keys():
@@ -390,20 +414,20 @@ class Ship:
             self.componentNames.append(component.naming())
             self.recompile(self.base)
 
-    def addAoe(self, ship):
-        self.aoeShips.append(ship)
+    def addAoe(self, ship, enemy):
+        self.aoeShips.append([ship, enemy])
         self.updateShips.append(ship)
 
-    def addExtended(self, ship):
-        self.extendedShips.append(ship)
+    def addExtended(self, ship, enemy):
+        self.extendedShips.append([ship, enemy])
         self.updateShips.append(ship)
 
-    def removeAoe(self, ship):
-        self.aoeShips.remove(ship)
+    def removeAoe(self, ship, enemy):
+        self.aoeShips.remove([ship, enemy])
         self.updateShips.remove(ship)
 
-    def removeExtended(self, ship):
-        self.extendedShips.remove(ship)
+    def removeExtended(self, ship, enemy):
+        self.extendedShips.remove([ship, enemy])
         self.updateShips.remove(ship)
 
     def dps(self):
@@ -678,7 +702,7 @@ class Character:
     def addShip(self, db):
         return Ship(db, self)
 
-    def addImplant(self, name="",implant=""):
+    def addImplant(self, name="", implant=""):
         if not implant:
             implant = Implant(name)
         slot = self.slots[implantDB["lobes"].index(implant.lobe)]
@@ -687,7 +711,7 @@ class Character:
             slot[0] = slot[0] + 1
             self.applySkills()
 
-    def removeImplant(self,implant):
+    def removeImplant(self, implant):
         self.implants.remove(implant)
         slot = self.slots[implantDB["lobes"].index(implant.lobe)]
         slot[0] = slot[0] - 1
@@ -1042,7 +1066,7 @@ class Implant:
 
 loader()
 steve = Character(level=32)
-rifter = Ship(TestShipDB["Covert"],steve)
+rifter = Ship(TestShipDB["Covert"], steve)
 print(rifter.guns[0].damage)
 strang = "Crowley AO-024 II"
 steve.addImplant(name=strang)

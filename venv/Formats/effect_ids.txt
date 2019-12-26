@@ -59,6 +59,10 @@ Cooldown    2   INVERTED
 Activation  3   INVERTED
 Range   4
 
+Self    0
+Extended    1
+AOE 2
+
 Device 100-1000
     Enhancer    100
         Thruster    110
