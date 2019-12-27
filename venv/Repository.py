@@ -142,6 +142,8 @@ class Ship:
         self.licenseBonuses = self.db['licenseBonuses']
         self.applySkills()
         self.addGun(self.db['artillery'], self.affects)
+        self.addDevice(self.db['thruster'])
+        self.addDevice(self.db['shield'])
         char.ships.append(self)
 
     def reset(self):
@@ -164,7 +166,7 @@ class Ship:
         self.shieldRecovery = self.db['shieldRecovery']
         self.cargo = self.db['cargo']
         self.artillery = self.db['artillery']
-        self.devCap = 2
+        self.devCap = 4
         self.license = self.char.licenses()[self.race][self.tech][self.type]
         self.attributes = [0, self.armor, self.shield, self.resistances, self.processor, self.power, self.warpStab,
                            self.warpSpeed, self.speed, self.energy, self.recovery, self.agility, self.volume,
@@ -175,7 +177,7 @@ class Ship:
         if self.license == 0:
             print("Lacks License")
         elif self.license > 3:
-            self.devCap = 3
+            self.devCap = self.devCap + 1
             if self.license > 5:
                 self.comCap = self.comCap + 1
         for key, val in self.hullBonuses.items():
@@ -211,6 +213,12 @@ class Ship:
                     self.attributes[2] = self.attributes[2] + each
             else:
                 self.attributes[2] = self.attributes[2] + self.affects[22]
+        if 23 in self.affects:
+            if isinstance(self.affects[23], list):
+                for each in self.affects[23]:
+                    self.attributes[13] = self.attributes[13] + each
+            else:
+                self.attributes[13] = self.attributes[13] + self.affects[23]
         if 29 in self.affects:
             if isinstance(self.affects[29], list):
                 for each in self.affects[29]:
@@ -476,9 +484,9 @@ TestDeviceDB = {
 }
 
 TestShipDB = {
-    "Covert": {
+    "Convert": {
         "type": 0,
-        'tech': 0,
+        'tech': 1,
         "race": "OE",
         "armor": 1760,
         "shield": 1876,
@@ -498,8 +506,8 @@ TestShipDB = {
         "hullBonuses": {"26": 1, "15": 15, "16": 55},
         "licenseBonuses": {"10": 4.5, "12": 2, "601": 3},
         "artillery": {
-            "tech": 0,
-            "rank": 0,
+            "tech": 1,
+            "rank": 1,
             "damage": 18,
             "damages": [6, 6, 6],
             "cooldown": 1,
@@ -516,6 +524,40 @@ TestShipDB = {
             "power": 0,
             "type": 0,
             "name": "Frigate Std Artillery"
+        },
+        "shield":{
+            "name": "Frigate Std. Shield Recharger",
+            "id": 20,
+            "tech": 1.0,
+            "rank": 1.0,
+            "activation": 230,
+            "range": 0,
+            "cooldown": 30,
+            "effectType": 0,
+            "effect2": 0,
+            "effects2": 0,
+            "processor": 0,
+            "power": 0,
+            "effect": 14.2604,
+            "effectTime": 30,
+            "effects": 23
+        },
+        "thruster":{
+            "name": "Frigate Std. Ion Thruster",
+            "id": 10,
+            "tech": 1.0,
+            "rank": 1.0,
+            "activation": 459,
+            "range": 0,
+            "cooldown": 30,
+            "effectType": 0,
+            "effect2": 0,
+            "effects2": 0,
+            "processor": 0,
+            "power": 0,
+            "effect": 100,
+            "effectTime": 30,
+            "effects": 8
         }
     }
 }
@@ -722,6 +764,7 @@ class Gun:
         self.db = db
         self.affects = matrix
         self.inverted = [1, 7]
+        self.active = True
         self.applySkills(self.affects)
 
     def applySkills(self, matrix):
@@ -781,34 +824,46 @@ class Gun:
         return [self.processor, self.power]
 
     def dps(self):
-        if self.damages:
-            return ((sum(self.damages) / self.cooldown) * (1 - self.critChance)) + (
-                    (sum(self.damages) / self.cooldown) * (self.critChance * self.critDmg))
+        if self.active:
+            if self.damages:
+                return ((sum(self.damages) / self.cooldown) * (1 - self.critChance)) + (
+                        (sum(self.damages) / self.cooldown) * (self.critChance * self.critDmg))
+            else:
+                return ((self.damage / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damage / self.cooldown) * (self.critChance * self.critDmg))
         else:
-            return ((self.damage / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damage / self.cooldown) * (self.critChance * self.critDmg))
+            return 0
 
     def dpsResist(self, resist):
-        if self.damages:
-            one = (((self.damages[0] / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damages[0] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[0])
-            two = (((self.damages[1] / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damages[1] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[1])
-            three = (((self.damages[2] / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damages[2] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[2])
-            return one + two + three
+        if self.active:
+            if self.damages:
+                one = (((self.damages[0] / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damages[0] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[0])
+                two = (((self.damages[1] / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damages[1] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[1])
+                three = (((self.damages[2] / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damages[2] / self.cooldown) * (self.critChance * self.critDmg))) * (1 - resist[2])
+                return one + two + three
+            else:
+                return ((self.damage / self.cooldown) * (1 - self.critChance)) + (
+                        (self.damage / self.cooldown) * (self.critChance * self.critDmg))
         else:
-            return ((self.damage / self.cooldown) * (1 - self.critChance)) + (
-                    (self.damage / self.cooldown) * (self.critChance * self.critDmg))
+            return 0
 
     def drain(self):
-        return self.activation / self.cooldown
+        if self.active:
+            return self.activation / self.cooldown
+        else:
+            return 0
 
     def ammoTime(self):
-        if self.ammo == 0:
-            return math.inf
+        if self.active:
+            if self.ammo == 0:
+                return math.inf
+            else:
+                return (self.ammo / self.ammoUsage) * self.cooldown
         else:
-            return (self.ammo / self.ammoUsage) * self.cooldown
+            return math.inf
 
 
 class Device:
@@ -816,6 +871,7 @@ class Device:
         self.db = db
         self.affects = matrix
         self.inverted = [2, 3]
+        self.active = True
         self.applySkills(self.affects)
 
     def applySkills(self, matrix):
@@ -851,62 +907,74 @@ class Device:
         self.attributes = [0, self.effect, self.cooldown, self.activation, self.range]
 
     def matrixReturn(self):
-        if self.effectType == 0:
-            returns = {}
-            if self.effects == 3:
-                returns[31] = self.effect
-                returns[32] = self.effect
-                returns[33] = self.effect
-            elif isinstance(self.effects, list):
-                for each in self.effects:
-                    returns[each] = self.effect
+        if self.active:
+            if self.effectType == 0:
+                returns = {}
+                if self.effects == 3:
+                    returns[31] = self.effect
+                    returns[32] = self.effect
+                    returns[33] = self.effect
+                elif isinstance(self.effects, list):
+                    for each in self.effects:
+                        returns[each] = self.effect
+                else:
+                    returns[self.effects] = self.effect
+                if isinstance(self.effects2, list):
+                    for each in self.effects2:
+                        returns[each] = self.effect2
+                else:
+                    returns[self.effects2] = self.effect2
+                return returns
             else:
-                returns[self.effects] = self.effect
-            if isinstance(self.effects2, list):
-                for each in self.effects2:
-                    returns[each] = self.effect2
-            else:
-                returns[self.effects2] = self.effect2
-            return returns
+                return {}
         else:
             return {}
 
     def aoeReturn(self):
-        if self.effectType == 2:
-            returns = {}
-            if isinstance(self.effects, list):
-                for each in self.effects:
-                    returns[each] = self.effect
+        if self.active:
+            if self.effectType == 2:
+                returns = {}
+                if isinstance(self.effects, list):
+                    for each in self.effects:
+                        returns[each] = self.effect
+                else:
+                    returns[self.effects] = self.effect
+                if isinstance(self.effects2, list):
+                    for each in self.effects2:
+                        returns[each] = self.effect2
+                else:
+                    returns[self.effects2] = self.effect2
+                return returns
             else:
-                returns[self.effects] = self.effect
-            if isinstance(self.effects2, list):
-                for each in self.effects2:
-                    returns[each] = self.effect2
-            else:
-                returns[self.effects2] = self.effect2
-            return returns
+                return {}
         else:
             return {}
 
     def extendedReturn(self):
-        if self.effectType == 1:
-            returns = {}
-            if isinstance(self.effects, list):
-                for each in self.effects:
-                    returns[each] = self.effect
+        if self.active:
+            if self.effectType == 1:
+                returns = {}
+                if isinstance(self.effects, list):
+                    for each in self.effects:
+                        returns[each] = self.effect
+                else:
+                    returns[self.effects] = self.effect
+                if isinstance(self.effects2, list):
+                    for each in self.effects2:
+                        returns[each] = self.effect2
+                else:
+                    returns[self.effects2] = self.effect2
+                return returns
             else:
-                returns[self.effects] = self.effect
-            if isinstance(self.effects2, list):
-                for each in self.effects2:
-                    returns[each] = self.effect2
-            else:
-                returns[self.effects2] = self.effect2
-            return returns
+                return {}
         else:
             return {}
 
     def drain(self):
-        return self.activation / self.cooldown
+        if self.active:
+            return self.activation / self.cooldown
+        else:
+            return 0
 
     def naming(self):
         return self.name
@@ -993,61 +1061,64 @@ class Implant:
         if self.oem:
             primary = self.type[0]
             secondary = self.type[1]
-            if primary in ["A", "R", "C", "F"]:
-                if secondary == "O":
-                    if self.subtype == 0:
-                        affects = implantDB["oemAffects"][primary][0] + 50
-                        effect = round(implantDB["oemMultipliers"][primary][0] * multi, 1)
-                        self.output = {
-                            affects: effect
-                        }
+            if secondary in implantDB["oemCombos"][primary]:
+                if primary in ["A", "R", "C", "F"]:
+                    if secondary == "O":
+                        if self.subtype == 0:
+                            affects = implantDB["oemAffects"][primary][0] + 50
+                            effect = round(implantDB["oemMultipliers"][primary][0] * multi, 1)
+                            self.output = {
+                                affects: effect
+                            }
+                        else:
+                            effect = round(implantDB["oemMultipliers"][primary][0] * (1 / 3) * multi, 1)
+                            affects = implantDB["oemAffects"][primary][0]
+                            self.output = {
+                                affects + implantDB["oemCycle"][self.subtype][0]: effect,
+                                affects + implantDB["oemCycle"][self.subtype][1]: effect
+                            }
                     else:
-                        effect = round(implantDB["oemMultipliers"][primary][0] * (1 / 3) * multi, 1)
-                        affects = implantDB["oemAffects"][primary][0]
-                        self.output = {
-                            affects + implantDB["oemCycle"][self.subtype][0]: effect,
-                            affects + implantDB["oemCycle"][self.subtype][1]: effect
-                        }
+                        if self.subtype == 0:
+                            affects = [implantDB["oemAffects"][primary][0] + 50].extend(implantDB["oemAffects"][secondary])
+                            effect = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                            for each in affects:
+                                self.output[each] = effect
+                        else:
+                            effect = round(implantDB["oemMultipliers"][primary][0] * 0.75 * (1 / 3) * multi, 1)
+                            affects = implantDB["oemAffects"][primary][0]
+                            self.output = {
+                                affects + implantDB["oemCycle"][self.subtype][0]: effect,
+                                affects + implantDB["oemCycle"][self.subtype][1]: effect,
+                            }
+                            affects = implantDB["oemAffects"][secondary]
+                            for each in affects:
+                                self.output[each] = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
                 else:
-                    if self.subtype == 0:
-                        affects = [implantDB["oemAffects"][primary][0] + 50].extend(implantDB["oemAffects"][secondary])
-                        effect = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                    if secondary == "O":
+                        affects = implantDB["oemAffects"][primary]
+                        effects = round(implantDB["oemMultipliers"][primary][0] * multi, 1)
                         for each in affects:
-                            self.output[each] = effect
+                            self.output[each] = effects
+                    if secondary in ["A", "R", "C", "F"]:
+                        affects = implantDB["oemAffects"][primary]
+                        effects = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                        for each in affects:
+                            self.output[each] = effects
+                        effect = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
+                        affects = implantDB["oemAffects"][secondary][0]
+                        self.output[affects + implantDB["oemCycle"][self.subtype][0]] = effect
+                        self.output[affects + implantDB["oemCycle"][self.subtype][1]] = effect
                     else:
-                        effect = round(implantDB["oemMultipliers"][primary][0] * 0.75 * (1 / 3) * multi, 1)
-                        affects = implantDB["oemAffects"][primary][0]
-                        self.output = {
-                            affects + implantDB["oemCycle"][self.subtype][0]: effect,
-                            affects + implantDB["oemCycle"][self.subtype][1]: effect,
-                        }
+                        affects = implantDB["oemAffects"][primary]
+                        effects = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
+                        for each in affects:
+                            self.output[each] = effects
                         affects = implantDB["oemAffects"][secondary]
+                        effects = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
                         for each in affects:
-                            self.output[each] = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
+                            self.output[each] = effects
             else:
-                if secondary == "O":
-                    affects = implantDB["oemAffects"][primary]
-                    effects = round(implantDB["oemMultipliers"][primary][0] * multi, 1)
-                    for each in affects:
-                        self.output[each] = effects
-                if secondary in ["A", "R", "C", "F"]:
-                    affects = implantDB["oemAffects"][primary]
-                    effects = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
-                    for each in affects:
-                        self.output[each] = effects
-                    effect = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
-                    affects = implantDB["oemAffects"][secondary][0]
-                    self.output[affects + implantDB["oemCycle"][self.subtype][0]] = effect
-                    self.output[affects + implantDB["oemCycle"][self.subtype][1]] = effect
-                else:
-                    affects = implantDB["oemAffects"][primary]
-                    effects = round(implantDB["oemMultipliers"][primary][0] * 0.75 * multi, 1)
-                    for each in affects:
-                        self.output[each] = effects
-                    affects = implantDB["oemAffects"][secondary]
-                    effects = round(implantDB["oemMultipliers"][secondary][1] * multi, 1)
-                    for each in affects:
-                        self.output[each] = effects
+                return
         else:
             affects = implantDB["amAffects"][self.lobe][self.type][self.subtype - 1]
             effect = implantDB["amMultipliers"][self.lobe][self.type][self.subtype - 1]
@@ -1066,7 +1137,7 @@ class Implant:
 
 loader()
 steve = Character(level=32)
-rifter = Ship(TestShipDB["Covert"], steve)
+rifter = Ship(TestShipDB["Convert"], steve)
 print(rifter.guns[0].damage)
 strang = "Crowley AO-024 II"
 steve.addImplant(name=strang)

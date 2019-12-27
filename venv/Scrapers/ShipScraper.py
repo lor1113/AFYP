@@ -3,12 +3,12 @@ import json
 import re
 
 ships = {}
+brokenLinks = []
 session = HTMLSession()
 header = {'user_agent': 'skeet skeet yeet', 'Accept-Encoding': 'gzip'}
 datab = session.get('https://us-news.zlongame.com/sgwarship/index.jhtml', headers=header)
 links = datab.html.links
 links = [n for n in links if "shiptype" in n]
-
 
 def intextract(string):
     flat = [item for sublist in string for item in sublist]
@@ -17,6 +17,22 @@ def intextract(string):
 
 
 names = ["Frigate", "Destroyer", "Cruiser", "Battlecruiser", "Battleship"]
+
+thrusters = [
+    [459, 920, 1653],
+    [767, 1533, 2750],
+    [1241, 2480, 4427],
+    [1836, 3674, 6558],
+    [2297, 4592, 8197]
+]
+
+shields = [
+    [[230, 14], [460, 28], [827, 50]],
+    [[383, 23], [767, 47], [1380, 84]],
+    [[620, 37], [1240, 74], [2213, 132]],
+    [[918, 56], [1836, 112], [3277, 200]],
+    [[1148, 70], [2296, 140], [4098, 250]]
+]
 
 
 def writer(target, tbw):
@@ -45,6 +61,38 @@ def parse(data):
         "power": 0,
         "type": 0,
     }
+    ship["shields"] = {
+        "id": 20,
+        "tech": 0,
+        "rank": 0,
+        "activation": 230,
+        "range": 0,
+        "cooldown": 30,
+        "effectType": 0,
+        "effect2": 0,
+        "effects2": 0,
+        "processor": 0,
+        "power": 0,
+        "effect": 0,
+        "effectTime": 30,
+        "effects": 23
+    }
+    ship["thruster"] = {
+        "id": 10,
+        "tech": 0,
+        "rank": 0,
+        "activation": 0,
+        "range": 0,
+        "cooldown": 30,
+        "effectType": 0,
+        "effect2": 0,
+        "effects2": 0,
+        "processor": 0,
+        "power": 0,
+        "effect": 100,
+        "effectTime": 30,
+        "effects": 8
+    }
     yeet = data.html.find(".ship_desc.ship_desc_t > li")
     for each in yeet:
         if "Type" in each.text:
@@ -72,6 +120,8 @@ def parse(data):
         ship['tech'] = 2
     elif 'T3' in yeet.text:
         ship['tech'] = 3
+    else:
+        return 404
     if 'OE' in yeet.text:
         ship['race'] = "OE"
     if 'RS' in yeet.text:
@@ -110,16 +160,23 @@ def parse(data):
             listNums = map(int, re.findall('\d+', each.text))
             listN = list(listNums)
             ship['artillery']['damage'] = listN.pop()
-            ship['artillery']['damages'] = [ship['artillery']['damage'] / 3, ship['artillery']['damage'] / 3,ship['artillery']['damage'] / 3]
+            ship['artillery']['damages'] = [ship['artillery']['damage'] / 3, ship['artillery']['damage'] / 3, ship['artillery']['damage'] / 3]
             ship['artillery']['range'] = listN.pop()
-            ship['artillery']['name'] = names[ship['type']] + " Std Artillery"
+            ship['artillery']['name'] = names[ship['type']] + " Artillery"
+    ship['thruster']['name'] = names[ship['type']] + " Std. Ion Thruster"
+    ship['shields']['name'] = names[ship['type']] + " Std. Shield Recharger"
+    ship['thruster']['activation'] = thrusters[ship['type']][ship['tech']-1]
+    ship['shields']['activation'] = shields[ship['type']][ship['tech']-1][0]
+    ship['shields']['effect'] = shields[ship['type']][ship['tech']-1][1]
     ships[name] = ship
     print(ship)
 
 
 for each in links:
     datab = session.get(each, headers=header)
-    parse(datab)
+    if parse(datab) == 404:
+        brokenLinks.append(each)
 
 print(len(ships))
 writer('Ships.json', ships)
+print(brokenLinks)

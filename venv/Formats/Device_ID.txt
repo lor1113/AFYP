@@ -1,3 +1,7 @@
+Base Devices    0
+    Thruster    10
+    Shield  20
+
 Enhancer    100
     Thruster    110
     Agility Thruster    120
