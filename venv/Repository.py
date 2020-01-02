@@ -274,87 +274,91 @@ class Ship:
                     self.aoeAffects[each2] = response[each2]
         return self.aoeAffects
 
-    def recompile(self, matrix):
+    def recompile(self, matrix, stage):
         self.affects = matrix
-        for each in self.aoeShips:
-            each[0].recompile(each.base)
-            toAppend = each[0].aoeAffects
-            for each2 in toAppend.keys():
-                if each[1]:
-                    if each2 > 8000:
-                        if each2 in self.affects:
-                            if isinstance(self.affects[each2], list):
-                                self.affects[each2].append(toAppend[each2])
+        if stage < 3:
+            for each in self.aoeShips:
+                each[0].recompile(each.base,3)
+                toAppend = each[0].aoeAffects
+                for each2 in toAppend.keys():
+                    if each[1]:
+                        if each2 > 8000:
+                            if each2 in self.affects:
+                                if isinstance(self.affects[each2], list):
+                                    self.affects[each2].append(toAppend[each2])
+                                else:
+                                    self.affects[each2] = [self.affects[each2]]
+                                    self.affects[each2].append(toAppend[each2])
                             else:
-                                self.affects[each2] = [self.affects[each2]]
-                                self.affects[each2].append(toAppend[each2])
-                        else:
-                            self.affects[each2] = toAppend[each2]
-                else:
-                    if each2 < 8000:
-                        if each2 in self.affects:
-                            if isinstance(self.affects[each2], list):
-                                self.affects[each2].append(toAppend[each2])
-                            else:
-                                self.affects[each2] = [self.affects[each2]]
-                                self.affects[each2].append(toAppend[each2])
-                        else:
-                            self.affects[each2] = toAppend[each2]
-        for each in self.extendedShips:
-            each[0].recompile(each.base)
-            toAppend = each[0].extendedAffects
-            for each2 in toAppend.keys():
-                if each[1]:
-                    if each2 > 8000:
-                        if each2 in self.affects:
-                            if isinstance(self.affects[each2], list):
-                                self.affects[each2].append(toAppend[each2])
-                            else:
-                                self.affects[each2] = [self.affects[each2]]
-                                self.affects[each2].append(toAppend[each2])
-                        else:
-                            self.affects[each2] = toAppend[each2]
-                else:
-                    if each2 < 8000:
-                        if each2 in self.affects:
-                            if isinstance(self.affects[each2], list):
-                                self.affects[each2].append(toAppend[each2])
-                            else:
-                                self.affects[each2] = [self.affects[each2]]
-                                self.affects[each2].append(toAppend[each2])
-                        else:
-                            self.affects[each2] = toAppend[each2]
-        for each in self.components:
-            toAppend = each.matrixReturn()
-            for each2 in toAppend.keys():
-                if each2 in self.affects:
-                    if isinstance(self.affects[each2], list):
-                        self.affects[each2].append(toAppend[each2])
+                                self.affects[each2] = toAppend[each2]
                     else:
-                        self.affects[each2] = [self.affects[each2]]
-                        self.affects[each2].append(toAppend[each2])
-                else:
-                    self.affects[each2] = toAppend[each2]
-        for each in self.devices:
-            each.applySkills(self.affects)
-            toAppend = each.matrixReturn()
-            for each2 in toAppend.keys():
-                if each2 in self.affects:
-                    if isinstance(self.affects[each2], list):
-                        self.affects[each2].append(toAppend[each2])
+                        if each2 < 8000:
+                            if each2 in self.affects:
+                                if isinstance(self.affects[each2], list):
+                                    self.affects[each2].append(toAppend[each2])
+                                else:
+                                    self.affects[each2] = [self.affects[each2]]
+                                    self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = toAppend[each2]
+            for each in self.extendedShips:
+                each[0].recompile(each.base,3)
+                toAppend = each[0].extendedAffects
+                for each2 in toAppend.keys():
+                    if each[1]:
+                        if each2 > 8000:
+                            if each2 in self.affects:
+                                if isinstance(self.affects[each2], list):
+                                    self.affects[each2].append(toAppend[each2])
+                                else:
+                                    self.affects[each2] = [self.affects[each2]]
+                                    self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = toAppend[each2]
                     else:
-                        self.affects[each2] = [self.affects[each2]]
-                        self.affects[each2].append(toAppend[each2])
-                else:
-                    self.affects[each2] = toAppend[each2]
-        for each in self.guns:
-            each.applySkills(self.affects)
+                        if each2 < 8000:
+                            if each2 in self.affects:
+                                if isinstance(self.affects[each2], list):
+                                    self.affects[each2].append(toAppend[each2])
+                                else:
+                                    self.affects[each2] = [self.affects[each2]]
+                                    self.affects[each2].append(toAppend[each2])
+                            else:
+                                self.affects[each2] = toAppend[each2]
+        if stage < 2:
+            for each in self.components:
+                toAppend = each.matrixReturn()
+                for each2 in toAppend.keys():
+                    if each2 in self.affects:
+                        if isinstance(self.affects[each2], list):
+                            self.affects[each2].append(toAppend[each2])
+                        else:
+                            self.affects[each2] = [self.affects[each2]]
+                            self.affects[each2].append(toAppend[each2])
+                    else:
+                        self.affects[each2] = toAppend[each2]
+        if stage < 3:
+            for each in self.devices:
+                each.applySkills(self.affects)
+                toAppend = each.matrixReturn()
+                for each2 in toAppend.keys():
+                    if each2 in self.affects:
+                        if isinstance(self.affects[each2], list):
+                            self.affects[each2].append(toAppend[each2])
+                        else:
+                            self.affects[each2] = [self.affects[each2]]
+                            self.affects[each2].append(toAppend[each2])
+                    else:
+                        self.affects[each2] = toAppend[each2]
+        if stage < 5:
+            for each in self.guns:
+                each.applySkills(self.affects)
         self.applySkills()
         self.compileAoe()
         self.compileExtended()
         self.affects[0] = 0
         for each in self.updateShips:
-            each.recompile(each.base)
+            each.recompile(each.base,3)
 
     def getAttr(self, id):
         return self.attributes[id]
@@ -362,17 +366,17 @@ class Ship:
     def removeGun(self, gun):
         self.guns.remove(gun)
         self.gunNames.remove(gun.naming())
-        self.recompile(self.base)
+        self.recompile(self.base,4)
 
     def removeDevice(self, device):
         self.devices.remove(device)
         self.deviceNames.remove(device.naming())
-        self.recompile(self.base)
+        self.recompile(self.base,2)
 
     def removeComponent(self, component):
         self.components.remove(component)
         self.componentNames.remove(component.naming())
-        self.recompile(self.base)
+        self.recompile(self.base,1)
 
     def addGun(self, gunDatabase, affects):
         gun = Gun(gunDatabase, affects)
@@ -388,7 +392,6 @@ class Ship:
             self.processor = processor
             self.guns.append(gun)
             self.gunNames.append(gun.naming())
-            self.recompile(self.base)
 
     def addDevice(self, deviceDatabase):
         device = Device(deviceDatabase, self.affects)
@@ -404,7 +407,7 @@ class Ship:
             self.processor = processor
             self.devices.append(device)
             self.deviceNames.append(device.naming())
-            self.recompile(self.base)
+            self.recompile(self.base,2)
 
     def addComponent(self, componentDatabase):
         component = Component(componentDatabase)
@@ -420,7 +423,7 @@ class Ship:
             self.processor = processor
             self.components.append(component)
             self.componentNames.append(component.naming())
-            self.recompile(self.base)
+            self.recompile(self.base,1)
 
     def addAoe(self, ship, enemy):
         self.aoeShips.append([ship, enemy])
@@ -447,6 +450,15 @@ class Ship:
     def ammoTime(self):
         times = [gun.ammoTime() for gun in self.guns]
         return min(times)
+
+    def range(self):
+        ranges = [gun.range for gun in self.guns]
+        if max(ranges) == min(ranges):
+            return max(ranges)
+        else:
+            return[min(ranges),max(ranges)]
+
+
 
 
 TestComponentDB = {
@@ -695,7 +707,7 @@ class Character:
         self.affects = step2
         for each in self.ships:
             each.base = self.affects
-            each.recompile(self.affects)
+            each.recompile(self.affects,0)
         return self.affects
 
     def allX(self, x):

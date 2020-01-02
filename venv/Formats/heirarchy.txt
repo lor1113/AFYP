@@ -1,0 +1,6 @@
+Implants and Skills 0
+Components  1
+Devices 2
+Other Ships 3
+Guns    4
+Ship    5
